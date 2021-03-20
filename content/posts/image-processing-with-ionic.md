@@ -1,0 +1,19 @@
+---
+title: 'Image Processing with Ionic'
+date: Mon, 21 May 2018 12:52:49 +0000
+draft: false
+tags: ['color', 'filter', 'glass', 'image processing', 'ionic', 'ionicframework', 'mobile', 'photo', 'picture', 'selfhackaton']
+---
+
+One of these days at the office at the end of an inspiring meeting we found ourselves stuck. Image some experienced Software Engineers trying to find a proper angle to make a picture. That's right trying to find an angle, and the best we could do was this. ![](/images/2018/05/2018-05-16-12.32.53.jpg) Most of the meeting room walls are made of glass, it's an invitation to make notes, to draw, but how to make pictures of it so we can save as "documentation". The [https://github.com/hamilton-lima/glassCamera](https://github.com/hamilton-lima/glassCamera) project is a prototype to explore solutions to this problem, The initial implementation creates an image filter using color distance to filter the image and create a black and white version of it. as expected the result is not perfect but the exploration of the current state of [Ionic](https://ionicframework.com/) worth the effort.
+
+### Here are the notes from the exploration:
+
+*   There is no camera in the ionic browser neither in the emulator, I could Mock the camera with a fixed image, but I rather use a real device and in this case an iPhone.
+*   The [config.xml](https://github.com/hamilton-lima/glassCamera/blob/master/config.xml) file is where you define what features you want to use the device, you will see at the end of the file the intent to use the camera and the gallery to save images.
+*   The [Ionic framework](https://ionicframework.com/docs/components/#buttons) uses [Angular 5](https://angular.io/), use [Typescript](https://www.typescriptlang.org/) and the nice [component organization](https://github.com/hamilton-lima/glassCamera/tree/master/src/pages/home) was indeed a very good experience.
+*   I used a [Range](https://ionicframework.com/docs/api/components/range/Range/) component as input for the minimum color distance, but every time I touched the component the "ionChange" an event was triggered making too many calls to the image update, [adding "debounce" attribute set as 500](https://github.com/hamilton-lima/glassCamera/blob/3915d99041f7aa82fa4dc0a97a66a3f4b52d6228/src/pages/home/home.html#L4), that waits for 500milisecs before triggering the change event solved the problem.
+*   [Euclidian distance](https://en.wikipedia.org/wiki/Euclidean_distance) is used to calculate how similar the colors are, the implementation can be found at [colorDistance](https://github.com/hamilton-lima/glassCamera/blob/3915d99041f7aa82fa4dc0a97a66a3f4b52d6228/src/pages/home/imageprocessor.ts#L109) method.
+*   The [image processing](https://github.com/hamilton-lima/glassCamera/blob/master/src/pages/home/imageprocessor.ts) workflow is : [create an Image object in-memory,](https://github.com/hamilton-lima/glassCamera/blob/3915d99041f7aa82fa4dc0a97a66a3f4b52d6228/src/pages/home/imageprocessor.ts#L125) load the base64 data in it, draw in a in-memory canvas, for each pixel [that has a color close to the target color](https://github.com/hamilton-lima/glassCamera/blob/3915d99041f7aa82fa4dc0a97a66a3f4b52d6228/src/pages/home/imageprocessor.ts#L88) is painted black and the others white, then [create a new image with the results](https://github.com/hamilton-lima/glassCamera/blob/3915d99041f7aa82fa4dc0a97a66a3f4b52d6228/src/pages/home/imageprocessor.ts#L98), draw in a new canvas and return the updated base64, piece of cake :D.
+
+There are several links in the post for the project, feel free to use as you want. This is the main page in case you missed the links [https://github.com/hamilton-lima/glassCamera.](https://github.com/hamilton-lima/glassCamera)

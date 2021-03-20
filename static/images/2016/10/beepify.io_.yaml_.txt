@@ -1,0 +1,101 @@
+swagger: '2.0'
+info:
+  title: Beepify.io
+  description: All your product details at your fingertips
+  version: "1.0.0"
+# the domain of the service
+host: beepify.io
+# array of all schemes that your API supports
+schemes:
+  - http
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /product:
+    get:
+      summary: Product Details
+      description: |
+        Show stores and the prices nearby the user location.
+      parameters:
+        - name: code
+          in: query
+          description: barcode of the product
+          required: true
+          type: number
+          format: integer
+        - name: latitude
+          in: query
+          description: Latitude component of location.
+          required: true
+          type: number
+          format: double
+        - name: longitude
+          in: query
+          description: Longitude component of location.
+          required: true
+          type: number
+          format: double
+      tags:
+        - Products
+      responses:
+        200:
+          description: The product and the stores nearby
+          schema:
+            $ref: '#/definitions/Product'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+
+  Product:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Product name
+      description:
+        type: string
+        description: Description of product.
+      prices:
+        type: array
+        description: Array of stores with the location and price.
+        items: 
+          $ref: '#/definitions/Price'
+
+  Price:
+    type: object
+    properties:
+      value:
+        type: number
+        description: Product price at this store
+      currency:
+        type: string
+        description: "[ISO 4217](http://en.wikipedia.org/wiki/ISO_4217) currency code."
+      store:
+        $ref: '#/definitions/Store'
+
+  Store:
+    type: object
+    properties:
+      name:
+        type: string
+        description: Store name.
+      latitude:
+        type: number
+        description: Latitude of the store
+      longitude: 
+        type: number
+        description: Longitude of the store
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
