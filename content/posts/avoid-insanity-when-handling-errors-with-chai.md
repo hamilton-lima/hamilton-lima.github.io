@@ -8,7 +8,7 @@ tags: ['testing', 'chai', 'typescript', 'smallflatworld']
 ![Vaas from Farcry3](/images/2021/insanity.png) 
 If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, [The definition of insanity - Far Cry 3](https://www.youtube.com/watch?v=itjmKlYjUak). 
 
-While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction... Well Vaas has a point, repeating the same thing over and over and expecting the same results it's kinda insane. Then I try multiple ways to do the same thing, let's take a look.
+While coding some unit tests for the [SmallFlatWorld](https://github.com/hamilton-lima/smallflatworld) server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction... Well Vaas has a point, repeating the same thing over and over and expecting the same results it's kinda insane. Then I try multiple ways to do the same thing, let's take a look.
 
 ### What is this test about?
 
@@ -75,4 +75,4 @@ For me this is the winner :)
 ### References 
 
 - [Chai to.throw](https://www.chaijs.com/api/bdd/#method_throw)
-- [smallflatworld test code reference]()
+- [smallflatworld test code reference](https://github.com/hamilton-lima/smallflatworld/blob/8f57584dc6f5e3b8c2326ffb4f866ce110abc976/server/tests/memory.storage.spec.ts#L22)
