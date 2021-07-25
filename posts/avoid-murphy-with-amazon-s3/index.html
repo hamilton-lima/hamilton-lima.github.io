@@ -1,7 +1,75 @@
-<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="ie=edge"><meta name=theme-color content="#ffb703"><meta name=msapplication-TileColor content="#ffb703"><meta itemprop=name content="Avoid murphy with Amazon S3"><meta itemprop=description content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
-Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data."><meta itemprop=datePublished content="2016-11-02T02:21:15+00:00"><meta itemprop=dateModified content="2016-11-02T02:21:15+00:00"><meta itemprop=wordCount content="884"><meta itemprop=keywords content="aws,aws cli,backup,create user,murphy,mysqldump,s3,"><meta property="og:title" content="Avoid murphy with Amazon S3"><meta property="og:description" content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
-Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data."><meta property="og:type" content="article"><meta property="og:url" content="https://hamiltonlima.com/posts/avoid-murphy-with-amazon-s3/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2016-11-02T02:21:15+00:00"><meta property="article:modified_time" content="2016-11-02T02:21:15+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Avoid murphy with Amazon S3"><meta name=twitter:description content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
-Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data."><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color><link rel="shortcut icon" href=/favicon.ico><title>Avoid murphy with Amazon S3</title><link rel=stylesheet href=https://hamiltonlima.com/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin=anonymous></head><body id=page><header id=site-header class="animated slideInUp"><div class="hdr-wrapper section-inner"><div class=hdr-left><div class=site-branding><a href=https://hamiltonlima.com>Hamilton Lima</a></div><nav class="site-nav hide-in-mobile"><a href=https://hamiltonlima.com/posts>Posts</a></nav></div><div class="hdr-right hdr-icons"><span class="hdr-social hide-in-mobile"><a href=https://twitter.com/athanazio target=_blank rel="noopener me" title=Twitter><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9.0 01-3.14 1.53 4.48 4.48.0 00-7.86 3v1A10.66 10.66.0 013 4s-4 9 5 13a11.64 11.64.0 01-7 2c9 5 20 0 20-11.5a4.5 4.5.0 00-.08-.83A7.72 7.72.0 0023 3z"/></svg></a><a href=https://github.com/hamilton-lima target=_blank rel="noopener me" title=Github><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></span><button id=menu-btn class=hdr-btn title=Menu><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button></div></div></header><div id=mobile-menu class="animated fast"><ul><li><a href=https://hamiltonlima.com/posts>Posts</a></li></ul></div><main class="site-main section-inner animated fadeIn faster"><article class=thin><header class=post-header><div class=post-meta><span>Nov 2, 2016</span></div><h1>Avoid murphy with Amazon S3</h1></header><div class=content><p><img src=/images/2016/11/photo-1462045504115-6c1d931f07d1.jpg alt=photo-1462045504115-6c1d931f07d1> Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.</p><h3 id=preparing-the-vault-aka-amazon-s3>Preparing the vault, a.k.a. Amazon S3<a href=#preparing-the-vault-aka-amazon-s3 class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3><p>I decided to store my backups on Amazon S3 service, because is <a href=https://aws.amazon.com/s3/pricing/>cheap</a>, around USD0,03 per GB, and very simple to store and to retrieve the data. My first step to try to mount an remote amazon s3 storage as a linux folder at the server, lost some hours trying to make it work, but luckly found enlighment from one comment at stackoverflow: DON&rsquo;T USE IT :) seriously run from it! After been healed from the mount sickness, I just downloaded the <a href=http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3>Amazon Webservice command line tools</a> and everything run smoothly! But as I allways say: Nothing is simple, but everything is possible. The process has several small steps to follow, most of then you only do it once, So this are the steps you need to do at amazon to prepare your backup storage:</p><ul><li>Create you amazon S3 account - <a href=https://aws.amazon.com/free>https://aws.amazon.com/free</a></li><li><a href="https://console.aws.amazon.com/s3/home?region=us-east-1">Create a bucket</a> to save your data</li><li><a href="https://console.aws.amazon.com/iam/home?region=us-east-1#users">Create a user</a> to be access your bucket</li><li>Save the new user access key and secret, you will need it to setup your server</li><li>Give the new user the proper rights to your bucket</li></ul><p>Most of the steps are just click click and click. Give the proper rights to your new user require more setup. The idea is to <a href="https://console.aws.amazon.com/iam/home?region=us-east-1#policies">create a policy</a> and attach an user to it, and the policy has a well defined JSON format, yes a JSON format, <a href=http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html>with lots and lots of options</a>. You can do cool stuff like filter by IP, give rights during some period of time and several other cool features. I used the most simple rights: right to read the bucket and the right to create objects in the bucket, this is the policy description I used:</p><pre><code>{
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<meta http-equiv=x-ua-compatible content="ie=edge">
+<meta name=theme-color content="#ffb703">
+<meta name=msapplication-TileColor content="#ffb703">
+<meta itemprop=name content="Avoid murphy with Amazon S3">
+<meta itemprop=description content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
+Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data."><meta itemprop=datePublished content="2016-11-02T02:21:15+00:00">
+<meta itemprop=dateModified content="2016-11-02T02:21:15+00:00">
+<meta itemprop=wordCount content="884">
+<meta itemprop=keywords content="aws,aws cli,backup,create user,murphy,mysqldump,s3,"><meta property="og:title" content="Avoid murphy with Amazon S3">
+<meta property="og:description" content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
+Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://hamiltonlima.com/posts/avoid-murphy-with-amazon-s3/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2016-11-02T02:21:15+00:00">
+<meta property="article:modified_time" content="2016-11-02T02:21:15+00:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Avoid murphy with Amazon S3">
+<meta name=twitter:description content="Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.
+Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3 service, because is cheap, around USD0,03 per GB, and very simple to store and to retrieve the data.">
+<link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png>
+<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png>
+<link rel=manifest href=/site.webmanifest>
+<link rel=mask-icon href=/safari-pinned-tab.svg color>
+<link rel="shortcut icon" href=/favicon.ico>
+<title>Avoid murphy with Amazon S3</title>
+<link rel=stylesheet href=https://hamiltonlima.com/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin=anonymous>
+</head>
+<body id=page>
+<header id=site-header class="animated slideInUp">
+<div class="hdr-wrapper section-inner">
+<div class=hdr-left>
+<div class=site-branding>
+<a href=https://hamiltonlima.com>Hamilton Lima</a>
+</div>
+<nav class="site-nav hide-in-mobile">
+<a href=https://hamiltonlima.com/posts>Posts</a>
+</nav>
+</div>
+<div class="hdr-right hdr-icons">
+<span class="hdr-social hide-in-mobile"><a href=https://twitter.com/athanazio target=_blank rel="noopener me" title=Twitter><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9.0 01-3.14 1.53 4.48 4.48.0 00-7.86 3v1A10.66 10.66.0 013 4s-4 9 5 13a11.64 11.64.0 01-7 2c9 5 20 0 20-11.5a4.5 4.5.0 00-.08-.83A7.72 7.72.0 0023 3z"/></svg></a><a href=https://github.com/hamilton-lima target=_blank rel="noopener me" title=Github><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></span><button id=menu-btn class=hdr-btn title=Menu><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+</div>
+</div>
+</header>
+<div id=mobile-menu class="animated fast">
+<ul>
+<li><a href=https://hamiltonlima.com/posts>Posts</a></li>
+</ul>
+</div>
+<main class="site-main section-inner animated fadeIn faster">
+<article class=thin>
+<header class=post-header>
+<div class=post-meta><span>Nov 2, 2016</span></div>
+<h1>Avoid murphy with Amazon S3</h1>
+</header>
+<div class=content>
+<p><img src=/images/2016/11/photo-1462045504115-6c1d931f07d1.jpg alt=photo-1462045504115-6c1d931f07d1> Backups are like life insurance, you allways will be sorry if you don´t have when you need it. That&rsquo;s why I am sharing this step by step way to backup your application or site or wherever you have in production.</p>
+<h3 id=preparing-the-vault-aka-amazon-s3>Preparing the vault, a.k.a. Amazon S3<a href=#preparing-the-vault-aka-amazon-s3 class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
+<p>I decided to store my backups on Amazon S3 service, because is <a href=https://aws.amazon.com/s3/pricing/>cheap</a>, around USD0,03 per GB, and very simple to store and to retrieve the data. My first step to try to mount an remote amazon s3 storage as a linux folder at the server, lost some hours trying to make it work, but luckly found enlighment from one comment at stackoverflow: DON&rsquo;T USE IT :) seriously run from it! After been healed from the mount sickness, I just downloaded the <a href=http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3>Amazon Webservice command line tools</a> and everything run smoothly! But as I allways say: Nothing is simple, but everything is possible. The process has several small steps to follow, most of then you only do it once, So this are the steps you need to do at amazon to prepare your backup storage:</p>
+<ul>
+<li>Create you amazon S3 account - <a href=https://aws.amazon.com/free>https://aws.amazon.com/free</a></li>
+<li><a href="https://console.aws.amazon.com/s3/home?region=us-east-1">Create a bucket</a> to save your data</li>
+<li><a href="https://console.aws.amazon.com/iam/home?region=us-east-1#users">Create a user</a> to be access your bucket</li>
+<li>Save the new user access key and secret, you will need it to setup your server</li>
+<li>Give the new user the proper rights to your bucket</li>
+</ul>
+<p>Most of the steps are just click click and click. Give the proper rights to your new user require more setup. The idea is to <a href="https://console.aws.amazon.com/iam/home?region=us-east-1#policies">create a policy</a> and attach an user to it, and the policy has a well defined JSON format, yes a JSON format, <a href=http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html>with lots and lots of options</a>. You can do cool stuff like filter by IP, give rights during some period of time and several other cool features. I used the most simple rights: right to read the bucket and the right to create objects in the bucket, this is the policy description I used:</p>
+<pre><code>{
     &quot;Version&quot;: &quot;2012-10-17&quot;,
     &quot;Statement&quot;: \[
         {
@@ -19,10 +87,29 @@ Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3
         }
     \]
 }
-</code></pre><p>I took me some time to realize that we need two statements in the policy description: Allow ListBucket and GetBucketLocation to the bucket and other to allow all actions to the bucket files, attention to the diference: bucketname vs bucketname/*</p><h3 id=installing-awscli>Installing AWS CLI<a href=#installing-awscli class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3><p>The installation process is just install, add the access key and secret and test your setup, here are the steps:</p><pre><code>apt install awscli
+</code></pre><p>I took me some time to realize that we need two statements in the policy description: Allow ListBucket and GetBucketLocation to the bucket and other to allow all actions to the bucket files, attention to the diference: bucketname vs bucketname/*</p>
+<h3 id=installing-awscli>Installing AWS CLI<a href=#installing-awscli class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
+<p>The installation process is just install, add the access key and secret and test your setup, here are the steps:</p>
+<pre><code>apt install awscli
 aws configure
 cat ~/.aws/credentials
-</code></pre><p>After that you can use the aws command line interface, here are some samples:</p><p>aws s3 ls s3://bucketname</p><p>list the existing files in the bucket</p><p>aws s3 cp myfolder s3://bucketname/myfolder &ndash;recursive</p><p>copy myfolder recursively to s3</p><p>see all commands here : <a href=http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3>http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3</a></p><h3 id=the-backup-script>The backup script<a href=#the-backup-script class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3><p>Now that we have aws installed and the vault ready, let&rsquo;s talk about the backup script, first what if should do:</p><ul><li>save database dump with the timestamp on the file name</li><li>copy all the files from the nodejs application</li><li>copy all the files from wordpress</li><li>copy all the files from the static content</li><li>upload the content to Amazon S3</li></ul><p>So the following script is doing all of it:</p><pre><code>#!/bin/sh
+</code></pre><p>After that you can use the aws command line interface, here are some samples:</p>
+<p>aws s3 ls s3://bucketname</p>
+<p>list the existing files in the bucket</p>
+<p>aws s3 cp myfolder s3://bucketname/myfolder &ndash;recursive</p>
+<p>copy myfolder recursively to s3</p>
+<p>see all commands here : <a href=http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3>http://docs.aws.amazon.com/cli/latest/reference/s3/index.html#cli-aws-s3</a></p>
+<h3 id=the-backup-script>The backup script<a href=#the-backup-script class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
+<p>Now that we have aws installed and the vault ready, let&rsquo;s talk about the backup script, first what if should do:</p>
+<ul>
+<li>save database dump with the timestamp on the file name</li>
+<li>copy all the files from the nodejs application</li>
+<li>copy all the files from wordpress</li>
+<li>copy all the files from the static content</li>
+<li>upload the content to Amazon S3</li>
+</ul>
+<p>So the following script is doing all of it:</p>
+<pre><code>#!/bin/sh
 # get the current timestamp
 NOW=&quot;$(date +&quot;%Y%m%d\_%H%M%S\_%N&quot;)&quot;
 TODAY=&quot;$(date +&quot;%Y%m%d&quot;)&quot;
@@ -51,12 +138,52 @@ aws s3 cp /tmp/$TODAY s3://bucketname/$TODAY --recursive
 echo &quot;removing /tmp/bkp\_$NOW and /tmp/$TODAY&quot;
 rm -rf /tmp/bkp\_$NOW
 rm -rf /tmp/$TODAY
-</code></pre><p>Now let&rsquo;s comment some important parts of this script:</p><pre><code>TODAY=&quot;$(date +&quot;%Y%m%d&quot;)&quot;
-</code></pre><p>It creates an environment variable with the result of the execution of the command date with the Ymd format, the equivalent is done on NOW.</p><pre><code>mysqldump --complete-insert --no-set-names --host=127.0.0.1 --user=backup\_uzr --password=XXXX wordpress &gt; /tmp/bkp\_$NOW/wordpress.sql
-</code></pre><p>Note that we are using the password in the command line, so there one security issue here, in order to minimize this I created an read only user at the mysql database, with the following commands, that should be executed at msyql console</p><pre><code>GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@127.0.0.1 IDENTIFIED BY 'XXXX'; 
+</code></pre><p>Now let&rsquo;s comment some important parts of this script:</p>
+<pre><code>TODAY=&quot;$(date +&quot;%Y%m%d&quot;)&quot;
+</code></pre><p>It creates an environment variable with the result of the execution of the command date with the Ymd format, the equivalent is done on NOW.</p>
+<pre><code>mysqldump --complete-insert --no-set-names --host=127.0.0.1 --user=backup\_uzr --password=XXXX wordpress &gt; /tmp/bkp\_$NOW/wordpress.sql
+</code></pre><p>Note that we are using the password in the command line, so there one security issue here, in order to minimize this I created an read only user at the mysql database, with the following commands, that should be executed at msyql console</p>
+<pre><code>GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@127.0.0.1 IDENTIFIED BY 'XXXX'; 
 GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@localhost IDENTIFIED BY 'XXXX'; 
 flush privileges;
-</code></pre><p>After all the files are copied in different folders at /tmp/bkp_$NOW we run this magic command</p><pre><code>for dir in $(ls); do tar cvzf /tmp/$TODAY/${dir}\_$NOW.tar.gz ${dir}; done
-</code></pre><p>That can be split as follow:</p><ul><li>iterate over the result list from the command ls</li><li>for each element on that list set the value to the variable dir</li><li>execute a tar command creating a tar.gz file at the /tmp/$TODAY folder zipping the content of the variable dir</li></ul><p>After that run the aws cli command to push the results to the S3 In order to schedule the script use the command: crontab -e and add the line to run every dy at 04:42 AM</p><pre><code>42 4 \* \* \* /root/my-nice-backup-script.sh
-</code></pre><p>Have fun backuping up your sites!</p></div><hr class=post-end><footer class=post-info><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg><span class=tag><a href=https://hamiltonlima.com/tags/aws>aws</a></span><span class=tag><a href=https://hamiltonlima.com/tags/aws-cli>aws cli</a></span><span class=tag><a href=https://hamiltonlima.com/tags/backup>backup</a></span><span class=tag><a href=https://hamiltonlima.com/tags/create-user>create user</a></span><span class=tag><a href=https://hamiltonlima.com/tags/murphy>murphy</a></span><span class=tag><a href=https://hamiltonlima.com/tags/mysqldump>mysqldump</a></span><span class=tag><a href=https://hamiltonlima.com/tags/s3>s3</a></span></p><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6A2 2 0 004 4v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>884 Words</p><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2016-11-02 02:21 +0000</p></footer></article><div class="post-nav thin"><a class=next-post href=https://hamiltonlima.com/posts/robolucha-mask-editor/><span class=post-nav-label><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>&nbsp;Newer</span><br><span>Robolucha mask editor</span></a>
-<a class=prev-post href=https://hamiltonlima.com/posts/best-project-for-the-challenge-at-vanhackathon/><span class=post-nav-label>Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><br><span>Best project for the challenge at vanhackathon</span></a></div><div id=comments class=thin></div></main><footer id=site-footer class="section-inner thin animated fadeIn faster"><p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p><p>Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a></p></footer><script src=https://hamiltonlima.com/js/bundle.min.7d8545daa55d62427355498dd8da13f98ff79a7938ce7d2a5e2ae1ec0de3beb8.js integrity="sha256-fYVF2qVdYkJzVUmN2NoT+Y/3mnk4zn0qXirh7A3jvrg=" crossorigin=anonymous></script></body></html>
+</code></pre><p>After all the files are copied in different folders at /tmp/bkp_$NOW we run this magic command</p>
+<pre><code>for dir in $(ls); do tar cvzf /tmp/$TODAY/${dir}\_$NOW.tar.gz ${dir}; done
+</code></pre><p>That can be split as follow:</p>
+<ul>
+<li>iterate over the result list from the command ls</li>
+<li>for each element on that list set the value to the variable dir</li>
+<li>execute a tar command creating a tar.gz file at the /tmp/$TODAY folder zipping the content of the variable dir</li>
+</ul>
+<p>After that run the aws cli command to push the results to the S3 In order to schedule the script use the command: crontab -e and add the line to run every dy at 04:42 AM</p>
+<pre><code>42 4 \* \* \* /root/my-nice-backup-script.sh
+</code></pre><p>Have fun backuping up your sites!</p>
+</div>
+<hr class=post-end>
+<footer class=post-info>
+<p>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg><span class=tag><a href=https://hamiltonlima.com/tags/aws>aws</a></span><span class=tag><a href=https://hamiltonlima.com/tags/aws-cli>aws cli</a></span><span class=tag><a href=https://hamiltonlima.com/tags/backup>backup</a></span><span class=tag><a href=https://hamiltonlima.com/tags/create-user>create user</a></span><span class=tag><a href=https://hamiltonlima.com/tags/murphy>murphy</a></span><span class=tag><a href=https://hamiltonlima.com/tags/mysqldump>mysqldump</a></span><span class=tag><a href=https://hamiltonlima.com/tags/s3>s3</a></span>
+</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6A2 2 0 004 4v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>884 Words</p>
+<p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2016-11-02 02:21 +0000</p>
+</footer>
+</article>
+<div class="post-nav thin">
+<a class=next-post href=https://hamiltonlima.com/posts/robolucha-mask-editor/>
+<span class=post-nav-label><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-left"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>&nbsp;Newer</span><br><span>Robolucha mask editor</span>
+</a>
+<a class=prev-post href=https://hamiltonlima.com/posts/best-project-for-the-challenge-at-vanhackathon/>
+<span class=post-nav-label>Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><br><span>Best project for the challenge at vanhackathon</span>
+</a>
+</div>
+<div id=comments class=thin>
+</div>
+</main>
+<footer id=site-footer class="section-inner thin animated fadeIn faster">
+<p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
+<p>
+Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a>
+</p>
+</footer>
+<script src=https://hamiltonlima.com/js/bundle.min.7d8545daa55d62427355498dd8da13f98ff79a7938ce7d2a5e2ae1ec0de3beb8.js integrity="sha256-fYVF2qVdYkJzVUmN2NoT+Y/3mnk4zn0qXirh7A3jvrg=" crossorigin=anonymous></script>
+</body>
+</html>
