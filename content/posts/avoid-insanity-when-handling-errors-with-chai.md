@@ -2,7 +2,7 @@
 title: 'Avoid insanity when handling errors with Chai'
 date: Sat, 25 Jul 2021 10:34:00 
 draft: false
-tags: ['testing', 'chai', 'typescript', 'smallflatworld]
+tags: ['testing', 'chai', 'typescript', 'smallflatworld']
 ---
 
 ![Vaas from Farcry3](/images/2021/insanity.png) 
