@@ -1,6 +1,6 @@
 ---
 title: 'Avoid insanity when handling errors with Chai'
-date: Sat, 25 Jul 2021 10:34:00 
+date: Sat, 25 Jul 2021 10:34:00 +0000
 draft: false
 tags: ['testing', 'chai', 'typescript', 'smallflatworld']
 ---
@@ -53,7 +53,7 @@ The second version, using the arrow syntax, as defined here [Arrow functions](ht
 
 Sending functions as parameters sometimes feels like blackmagic, I know how it works but requires some brainpower to process it, and for me tests should not be a place to exercise theses powers.
 
-![Brain you have no power here](/images/2021/you-have-no-power-here.png) 
+![Brain you have no power here](/images/2021/you-have-no-power-here.jpg) 
 
 ### The verbose, but clear
 ```
