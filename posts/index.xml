@@ -1,4 +1,52 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hamilton Lima</title><link>https://hamiltonlima.com/posts/</link><description>Recent content in Posts on Hamilton Lima</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 21 May 2018 12:52:49 +0000</lastBuildDate><atom:link href="https://hamiltonlima.com/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Image Processing with Ionic</title><link>https://hamiltonlima.com/posts/image-processing-with-ionic/</link><pubDate>Mon, 21 May 2018 12:52:49 +0000</pubDate><guid>https://hamiltonlima.com/posts/image-processing-with-ionic/</guid><description>One of these days at the office at the end of an inspiring meeting we found ourselves stuck. Image some experienced Software Engineers trying to find a proper angle to make a picture. That&amp;rsquo;s right trying to find an angle, and the best we could do was this. Most of the meeting room walls are made of glass, it&amp;rsquo;s an invitation to make notes, to draw, but how to make pictures of it so we can save as &amp;ldquo;documentation&amp;rdquo;.</description><content type="html"><![CDATA[<p>One of these days at the office at the end of an inspiring meeting we found ourselves stuck. Image some experienced Software Engineers trying to find a proper angle to make a picture. That&rsquo;s right trying to find an angle, and the best we could do was this. <img src="/images/2018/05/2018-05-16-12.32.53.jpg" alt=""> Most of the meeting room walls are made of glass, it&rsquo;s an invitation to make notes, to draw, but how to make pictures of it so we can save as &ldquo;documentation&rdquo;. The <a href="https://github.com/hamilton-lima/glassCamera">https://github.com/hamilton-lima/glassCamera</a> project is a prototype to explore solutions to this problem, The initial implementation creates an image filter using color distance to filter the image and create a black and white version of it. as expected the result is not perfect but the exploration of the current state of <a href="https://ionicframework.com/">Ionic</a> worth the effort.</p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hamilton Lima</title><link>https://hamiltonlima.com/posts/</link><description>Recent content in Posts on Hamilton Lima</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 25 Jul 2021 10:34:00 +0000</lastBuildDate><atom:link href="https://hamiltonlima.com/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Avoid insanity when handling errors with Chai</title><link>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</link><pubDate>Sun, 25 Jul 2021 10:34:00 +0000</pubDate><guid>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</guid><description>If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, The definition of insanity - Far Cry 3.
+While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&amp;hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&amp;rsquo;s kinda insane.</description><content type="html"><![CDATA[<p><img src="/images/2021/insanity.png" alt="Vaas from Farcry3">
+If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, <a href="https://www.youtube.com/watch?v=itjmKlYjUak">The definition of insanity - Far Cry 3</a>.</p>
+<p>While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&rsquo;s kinda insane. Then I try multiple ways to do the same thing, let&rsquo;s take a look.</p>
+<h3 id="what-is-this-test-about">What is this test about?</h3>
+<ul>
+<li>Verify if a specific scenario will throw an exception</li>
+<li>Make a simple and readable test</li>
+<li>Write test that I can understand without a need for searching about it</li>
+<li>Minimize brainpower need to decypher the test so I can change without fear</li>
+</ul>
+<h2 id="what-are-the-options-i-tried">What are the options I tried</h2>
+<h3 id="the-magician-bind">The magician bind!</h3>
+<pre><code>expect(this.storage.getStorage.bind(this.storage, &quot;foo&quot;)).to.throw(
+  &quot;uuid dont exist in memory&quot;
+);
+</code></pre><p>If you look at the documentation you will find that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind">bind</a> will create a new function, with the <code>this</code> reference you passed as argument, plus other arguments you give to it.</p>
+<p>In other words, a function in this case <code>getStorage</code> can be recycled to be used in other instance, so other <code>this</code> reference and be called by the <code>expect</code> function and then we can check for the the error using <code>to.throw</code>.</p>
+<p>As I don&rsquo;t <code>bind</code> most of the time, this solution seems very fuzzy, it works but I would need a quick read to recap, and answer my expected reaction to this code in couple months: &ldquo;Why on earth am I using <code>bind</code> here?&rdquo;</p>
+<h3 id="anonymous-functions-ftw">Anonymous functions FTW!</h3>
+<pre><code>const self = this;
+expect(function () {
+  self.storage.getStorage(&quot;foo&quot;);
+}).to.throw(&quot;uuid dont exist in memory&quot;);
+
+expect(() =&gt; {
+  this.storage.getStorage(&quot;foo&quot;);
+}).to.throw(&quot;uuid dont exist in memory&quot;);
+</code></pre><p>Both solutions here rely on creating an anonymous function, and letting <code>expect</code> to execute them.</p>
+<p>But there is a gotcha, there is always a gotcha, when you create a function using <code>function ()</code> syntax, and you code is running on stric mode, that function <code>this</code> will be <code>undefined</code>! for this reason you can see a not so cool workaround, as know as patch and for me a fine example of <a href="https://gist.github.com/banaslee/4147370">Go horse programming</a>, the <code>const self = this</code>. that provides the existing <code>this</code> reference to the function.</p>
+<p>The second version, using the arrow syntax, as defined here <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">Arrow functions</a> does NOT have it&rsquo;s own <code>this</code> reference, so it will rely on the existing one, and that would work just fine.</p>
+<p>Sending functions as parameters sometimes feels like blackmagic, I know how it works but requires some brainpower to process it, and for me tests should not be a place to exercise theses powers.</p>
+<p><img src="/images/2021/you-have-no-power-here.jpg" alt="Brain you have no power here"></p>
+<h3 id="the-verbose-but-clear">The verbose, but clear</h3>
+<pre><code>try {
+  this.storage.getStorage(&quot;foo&quot;);
+} catch (error) {
+  expect(error.message).to.be.equal(&quot;uuid dont exist in memory&quot;);
+}
+</code></pre><p>This is the verbose version, but very clear what is going on, the code starts with <code>try {</code>, even if you don&rsquo;t know the language, or if you are very tired, or watching a video while reading the code, you will be able to understand that something is expected to go wrong in the next lines.</p>
+<p>The piece of code that is under test is called the same way it will be used in other parts of the code, so again no magic here, no mental transformation, no extra variables to hunt you with the question, will this impact the test? just a function call <code>this.storage.getStorage(&quot;foo&quot;);</code></p>
+<p>Then at the end a <code>catch</code> with a <code>expect</code> in it, saying out loud: &ldquo;This test expects the code above to fail, and to fail with this message&rdquo;.</p>
+<p>For me this is the winner :)</p>
+<h3 id="references">References</h3>
+<ul>
+<li><a href="https://www.chaijs.com/api/bdd/#method_throw">Chai to.throw</a></li>
+<li><a href="">smallflatworld test code reference</a></li>
+</ul>
+]]></content></item><item><title>Image Processing with Ionic</title><link>https://hamiltonlima.com/posts/image-processing-with-ionic/</link><pubDate>Mon, 21 May 2018 12:52:49 +0000</pubDate><guid>https://hamiltonlima.com/posts/image-processing-with-ionic/</guid><description>One of these days at the office at the end of an inspiring meeting we found ourselves stuck. Image some experienced Software Engineers trying to find a proper angle to make a picture. That&amp;rsquo;s right trying to find an angle, and the best we could do was this. Most of the meeting room walls are made of glass, it&amp;rsquo;s an invitation to make notes, to draw, but how to make pictures of it so we can save as &amp;ldquo;documentation&amp;rdquo;.</description><content type="html"><![CDATA[<p>One of these days at the office at the end of an inspiring meeting we found ourselves stuck. Image some experienced Software Engineers trying to find a proper angle to make a picture. That&rsquo;s right trying to find an angle, and the best we could do was this. <img src="/images/2018/05/2018-05-16-12.32.53.jpg" alt=""> Most of the meeting room walls are made of glass, it&rsquo;s an invitation to make notes, to draw, but how to make pictures of it so we can save as &ldquo;documentation&rdquo;. The <a href="https://github.com/hamilton-lima/glassCamera">https://github.com/hamilton-lima/glassCamera</a> project is a prototype to explore solutions to this problem, The initial implementation creates an image filter using color distance to filter the image and create a black and white version of it. as expected the result is not perfect but the exploration of the current state of <a href="https://ionicframework.com/">Ionic</a> worth the effort.</p>
 <h3 id="here-are-the-notes-from-the-exploration">Here are the notes from the exploration:</h3>
 <ul>
 <li>There is no camera in the ionic browser neither in the emulator, I could Mock the camera with a fixed image, but I rather use a real device and in this case an iPhone.</li>
@@ -241,7 +289,12 @@ Now the details&amp;hellip; I have several, around 100 junit tests in Robolucha 
 <li>hibernate.dialect=com.robolucha.test.MySQL5MyISAMDBDialectEngine</li>
 </ul>
 <p>Forcing the use of only one VM for all the tests, checking if all the necessary tables are in place, as this dont take that much time and using myISAM tables that has almost the same performance as in Memory but uses less memory.</p>
-]]></content></item><item><title>Holidays selfhackaton - the start</title><link>https://hamiltonlima.com/posts/holidays-selfhackaton-the-start/</link><pubDate>Mon, 26 Dec 2016 15:46:53 +0000</pubDate><guid>https://hamiltonlima.com/posts/holidays-selfhackaton-the-start/</guid><description>[caption id=&amp;ldquo;attachment_110&amp;rdquo; align=&amp;ldquo;alignnone&amp;rdquo; width=&amp;ldquo;800&amp;rdquo;]The selfhackaton plan![/caption] During this holidays celebration week, I will join myself in a hackaton! Me myself and I will code several new features to Robolucha. The image above shows the sprint meeting board, when my stakeholder, a.k.a. wife forced me to define priorities and a clear order of what to deliver during this week :) Translating the characters above for something more understandable, here is the list:</description><content type="html"><![CDATA[<p>[caption id=&ldquo;attachment_110&rdquo; align=&ldquo;alignnone&rdquo; width=&ldquo;800&rdquo;]<img src="/images/2016/12/selfhackaton-dec2016.jpg" alt=""> The selfhackaton plan![/caption] During this holidays celebration week, I will join myself in a hackaton! Me myself and I will code several new features to <a href="http://www.robolucha.com">Robolucha</a>. The image above shows the sprint meeting board, when my stakeholder, a.k.a. wife forced me to define priorities and a clear order of what to deliver during this week :) Translating the characters above for something more understandable, here is the list:</p>
+]]></content></item><item><title>Holidays selfhackaton - the start</title><link>https://hamiltonlima.com/posts/holidays-selfhackaton-the-start/</link><pubDate>Mon, 26 Dec 2016 15:46:53 +0000</pubDate><guid>https://hamiltonlima.com/posts/holidays-selfhackaton-the-start/</guid><description>The selfhackaton plan!
+During this holidays celebration week, I will join myself in a hackaton! Me myself and I will code several new features to Robolucha.
+The image above shows the sprint meeting board, when my stakeholder, a.k.a. wife forced me to define priorities and a clear order of what to deliver during this week :) Translating the characters above for something more understandable, here is the list:
+post about the selfhackaton itself describing the goals (done) merge move() and turn() methods in only one command queue so the commands are not executed in parallel rename start/repeat methods to setup/loop adopting &amp;ldquo;arduino-like&amp;rdquo; names post about the ant &amp;amp; hibernate unit tests optimization convert robolucha game presentation layer, the arena itself, to an angular component create the first version of the map editor using the new presentation layer add obstacles to the map editor create the server API to use in map editor elements create new games using the new map editor definitions Let´s code!</description><content type="html"><![CDATA[<p><img src="/images/2016/12/selfhackaton-dec2016.jpg" alt=""> The selfhackaton plan!</p>
+<p>During this holidays celebration week, I will join myself in a hackaton! Me myself and I will code several new features to <a href="http://www.robolucha.com">Robolucha</a>.</p>
+<p>The image above shows the sprint meeting board, when my stakeholder, a.k.a. wife forced me to define priorities and a clear order of what to deliver during this week :) Translating the characters above for something more understandable, here is the list:</p>
 <ul>
 <li>post about the selfhackaton itself describing the goals (done)</li>
 <li>merge move() and turn() methods in only one command queue so the commands are not executed in parallel</li>
@@ -666,7 +719,41 @@ libraryDependencies += evolutions
 
 enablePlugins(PlayEbean)
 </code></pre><p>With these configurations in place you are ready to build the application.</p>
-]]></content></item><item><title>beepify.io - implementation plan</title><link>https://hamiltonlima.com/posts/beepify-io-implementation-plan/</link><pubDate>Sun, 16 Oct 2016 15:00:21 +0000</pubDate><guid>https://hamiltonlima.com/posts/beepify-io-implementation-plan/</guid><description>This is the first implementation plan :) that will of course change during the implementation. So this is only the first guideline. - release 1 server create the models - read current location latitude, longitude (will need this to test) - add sample data to the database create services - get data receive product code, latitude and longitude return all prices deploy application to server client enter product code get current location from GPS get product prices from server - release 2 client read barcode server restrict the list to 1km range - release 3 client show stores in a map - release 4 server - add data service client - if product not found add data</description><content type="html">&lt;p>This is the first implementation plan :) that will of course change during the implementation. So this is only the first guideline. - release 1 server create the models - read current location latitude, longitude (will need this to test) - add sample data to the database create services - get data receive product code, latitude and longitude return all prices deploy application to server client enter product code get current location from GPS get product prices from server - release 2 client read barcode server restrict the list to 1km range - release 3 client show stores in a map - release 4 server - add data service client - if product not found add data&lt;/p></content></item><item><title>beepify.io - start</title><link>https://hamiltonlima.com/posts/beepify-io-start/</link><pubDate>Sun, 16 Oct 2016 12:51:26 +0000</pubDate><guid>https://hamiltonlima.com/posts/beepify-io-start/</guid><description>This will be one selfhackton project, to explore play framework as server side implementation and Ionic framework at the client side What is the main value of beepify.io?
+]]></content></item><item><title>beepify.io - implementation plan</title><link>https://hamiltonlima.com/posts/beepify-io-implementation-plan/</link><pubDate>Sun, 16 Oct 2016 15:00:21 +0000</pubDate><guid>https://hamiltonlima.com/posts/beepify-io-implementation-plan/</guid><description>This is the first implementation plan :) that will of course change during the implementation. So this is only the first guideline.
+release 1 server create the models
+read current location latitude, longitude (will need this to test)
+add sample data to the database create services
+get data receive product code, latitude and longitude return all prices deploy application to server client enter product code get current location from GPS get product prices from server</description><content type="html"><![CDATA[<p>This is the first implementation plan :) that will of course change during the implementation. So this is only the first guideline.</p>
+<ul>
+<li>
+<p>release 1 server create the models</p>
+</li>
+<li>
+<p>read current location latitude, longitude (will need this to test)</p>
+</li>
+<li>
+<p>add sample data to the database create services</p>
+</li>
+<li>
+<p>get data receive product code, latitude and longitude return all prices deploy application to server client enter product code get current location from GPS get product prices from server</p>
+</li>
+<li>
+<p>release 2 client read barcode server restrict the list to 1km range</p>
+</li>
+<li>
+<p>release 3 client show stores in a map</p>
+</li>
+<li>
+<p>release 4 server</p>
+</li>
+<li>
+<p>add data service client</p>
+</li>
+<li>
+<p>if product not found add data</p>
+</li>
+</ul>
+]]></content></item><item><title>beepify.io - start</title><link>https://hamiltonlima.com/posts/beepify-io-start/</link><pubDate>Sun, 16 Oct 2016 12:51:26 +0000</pubDate><guid>https://hamiltonlima.com/posts/beepify-io-start/</guid><description>This will be one selfhackton project, to explore play framework as server side implementation and Ionic framework at the client side What is the main value of beepify.io?
 Offer product information at your fingertips.
 Beepify.io will allow the customer to receive product information by scanning the product bar code.
 The start As I am planning to participate on the next Vanhackton, I invited other participants to start a project to warmup on some technologies:</description><content type="html"><![CDATA[<p>This will be one selfhackton project, to explore <a href="https://playframework.com/">play framework</a> as server side implementation and <a href="http://ionicframework.com/">Ionic framework</a> at the client side What is the main value of beepify.io?</p>
@@ -729,57 +816,14 @@ Warmup with the technologies you are planning to use Download and Install all th
 </ul>
 <p>To warmup with the technologies a good option is to have a small project to create, that gives you a target and organize your mindset to build something. I will keep track of my warming up experiences, so I can remember in the future the good and the not so good decisions I made, and hopefully learn from the comments and feedbacks, let´s code! <img src="/images/2016/10/i-just-felt-like-coding.png" alt="i-just-felt-like-coding"></p>
 ]]></content></item><item><title>The birth of robolucha</title><link>https://hamiltonlima.com/posts/the-birth-of-robolucha/</link><pubDate>Thu, 03 Mar 2016 00:28:45 +0000</pubDate><guid>https://hamiltonlima.com/posts/the-birth-of-robolucha/</guid><description>Several years ago, on 2004, when I was a teacher the Unicarioca University, I used robocode to make the Java learning more interesting. That was fantastic, the students were able to move their objectives from the code to build a robot that could perform better than others.
-[caption id=&amp;ldquo;attachment_7&amp;rdquo; align=&amp;ldquo;alignnone&amp;rdquo; width=&amp;ldquo;653&amp;rdquo;]me in the lab trolling one random student about his Java code.[/caption]
+me in the lab trolling one random student about his Java code.[/caption]
 After everybody finished their coding, all robots packed as jar files were sent to the teacher, a.</description><content type="html"><![CDATA[<p>Several years ago, on 2004, when I was a teacher the Unicarioca University, I used <a href="http://robocode.sourceforge.net/">robocode</a> to make the Java learning more interesting. That was fantastic, the students were able to move their objectives from the code to build a robot that could perform better than others.</p>
-<p>[caption id=&ldquo;attachment_7&rdquo; align=&ldquo;alignnone&rdquo; width=&ldquo;653&rdquo;]<img src="/images/2016/10/lab-troll.jpeg" alt="me in the lab trolling one random student about his Java code."> me in the lab trolling one random student about his Java code.[/caption]</p>
+<p><img src="/images/2016/10/lab-troll.jpeg" alt="me in the lab trolling one random student about his Java code."> me in the lab trolling one random student about his Java code.[/caption]</p>
 <p>After everybody finished their coding, all robots packed as jar files were sent to the teacher, a.k.a. ME and we all went to the university auditorium so everybody could the matches.</p>
 <p>And it really looked like a soccer match sometimes, people cheering, jumping, picking their favorites, so the competition was giving some joy to Java programming after all.</p>
 <p>But the world was not perfect … There were an weird feelling among all the coders, their creations, their babies were alone in the competition, and the creators were not able to help !!</p>
-<p>[caption id=&ldquo;attachment_6&rdquo; align=&ldquo;alignnone&rdquo; width=&ldquo;653&rdquo;]<img src="/images/2016/10/sad-creators.jpeg" alt="Sad creators that couldn’t change their robots."> Sad creators that couldn’t change their robots.[/caption]</p>
+<p><img src="/images/2016/10/sad-creators.jpeg" alt="Sad creators that couldn’t change their robots."> Sad creators that couldn’t change their robots.[/caption]</p>
 <p>Robocode is fantastic, but after you pack your robot you cannot change it, it goes as it is to the combat zone. So the creators felt powerless, and that pain gave me the idea of create something like robocode but where you could change the code during the match, so the combat would be more interactive, and the relationship between the creator and the creature would be much more intense.</p>
 <p>So that idea haunted me for years, then finally on 2014, ouch 10 years later ! I started to build <a href="https://www.facebook.com/robolucha">robolucha</a>, it started with a name of robot.js. It born when I was teaching game programming at NAVE, a High scholl at Rio de Janeiro, and with Fabio Corato help on some math implementation, I build a version based on nodejs where we could change the code on the fly !!</p>
 <p>And that was the birth of <a href="https://www.facebook.com/robolucha">robolucha </a>!! you can play it today.</p>
-]]></content></item><item><title>Avoid insanity when handling errors with Chai</title><link>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</guid><description>If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, The definition of insanity - Far Cry 3.
-While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&amp;hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&amp;rsquo;s kinda insane.</description><content type="html"><![CDATA[<p><img src="/images/2021/insanity.png" alt="Vaas from Farcry3">
-If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, <a href="https://www.youtube.com/watch?v=itjmKlYjUak">The definition of insanity - Far Cry 3</a>.</p>
-<p>While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&rsquo;s kinda insane. Then I try multiple ways to do the same thing, let&rsquo;s take a look.</p>
-<h3 id="what-is-this-test-about">What is this test about?</h3>
-<ul>
-<li>Verify if a specific scenario will throw an exception</li>
-<li>Make a simple and readable test</li>
-<li>Write test that I can understand without a need for searching about it</li>
-<li>Minimize brainpower need to decypher the test so I can change without fear</li>
-</ul>
-<h2 id="what-are-the-options-i-tried">What are the options I tried</h2>
-<h3 id="the-magician-bind">The magician bind!</h3>
-<pre><code>expect(this.storage.getStorage.bind(this.storage, &quot;foo&quot;)).to.throw(
-  &quot;uuid dont exist in memory&quot;
-);
-</code></pre><p>If you look at the documentation you will find that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind">bind</a> will create a new function, with the <code>this</code> reference you passed as argument, plus other arguments you give to it.</p>
-<p>In other words, a function in this case <code>getStorage</code> can be recycled to be used in other instance, so other <code>this</code> reference and be called by the <code>expect</code> function and then we can check for the the error using <code>to.throw</code>.</p>
-<p>As I don&rsquo;t <code>bind</code> most of the time, this solution seems very fuzzy, it works but I would need a quick read to recap, and answer my expected reaction to this code in couple months: &ldquo;Why on earth am I using <code>bind</code> here?&rdquo;</p>
-<h3 id="anonymous-functions-ftw">Anonymous functions FTW!</h3>
-<pre><code>const self = this;
-expect(function () {
-  self.storage.getStorage(&quot;foo&quot;);
-}).to.throw(&quot;uuid dont exist in memory&quot;);
-
-expect(() =&gt; {
-  this.storage.getStorage(&quot;foo&quot;);
-}).to.throw(&quot;uuid dont exist in memory&quot;);
-</code></pre><p>Both solutions here rely on creating an anonymous function, and letting <code>expect</code> to execute them.</p>
-<p>But there is a gotcha, there is always a gotcha, when you create a function using <code>function ()</code> syntax, and you code is running on stric mode, that function <code>this</code> will be <code>undefined</code>! for this reason you can see a not so cool workaround, as know as patch and for me a fine example of <a href="https://gist.github.com/banaslee/4147370">Go horse programming</a>, the <code>const self = this</code>. that provides the existing <code>this</code> reference to the function.</p>
-<p>The second version, using the arrow syntax, as defined here <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">Arrow functions</a> does NOT have it&rsquo;s own <code>this</code> reference, so it will rely on the existing one, and that would work just fine.</p>
-<p>Sending functions as parameters sometimes feels like blackmagic, I know how it works but requires some brainpower to process it, and for me tests should not be a place to exercise theses powers.</p>
-<p><img src="/images/2021/you-have-no-power-here.png" alt="Brain you have no power here"></p>
-<h3 id="the-verbose-but-clear">The verbose, but clear</h3>
-<pre><code>try {
-  this.storage.getStorage(&quot;foo&quot;);
-} catch (error) {
-  expect(error.message).to.be.equal(&quot;uuid dont exist in memory&quot;);
-}
-</code></pre><p>This is the verbose version, but very clear what is going on, the code starts with <code>try {</code>, even if you don&rsquo;t know the language, or if you are very tired, or watching a video while reading the code, you will be able to understand that something is expected to go wrong in the next lines.</p>
-<p>The piece of code that is under test is called the same way it will be used in other parts of the code, so again no magic here, no mental transformation, no extra variables to hunt you with the question, will this impact the test? just a function call <code>this.storage.getStorage(&quot;foo&quot;);</code></p>
-<p>Then at the end a <code>catch</code> with a <code>expect</code> in it, saying out loud: &ldquo;This test expects the code above to fail, and to fail with this message&rdquo;.</p>
-<p>For me this is the winner :)</p>
 ]]></content></item></channel></rss>
