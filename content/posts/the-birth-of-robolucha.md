@@ -7,7 +7,7 @@ tags: ['coding', 'education', 'robolucha', 'robolucha']
 
 Several years ago, on 2004, when I was a teacher the Unicarioca University, I used [robocode](http://robocode.sourceforge.net/) to make the Java learning more interesting. That was fantastic, the students were able to move their objectives from the code to build a robot that could perform better than others.
 
-\[caption id="attachment\_7" align="alignnone" width="653"\]![me in the lab trolling one random student about his Java code.](/images/2016/10/lab-troll.jpeg) me in the lab trolling one random student about his Java code.\[/caption\]
+![me in the lab trolling one random student about his Java code.](/images/2016/10/lab-troll.jpeg) me in the lab trolling one random student about his Java code.\[/caption\]
 
 After everybody finished their coding, all robots packed as jar files were sent to the teacher, a.k.a. ME and we all went to the university auditorium so everybody could the matches.
 
@@ -15,7 +15,7 @@ And it really looked like a soccer match sometimes, people cheering, jumping, pi
 
 But the world was not perfect … There were an weird feelling among all the coders, their creations, their babies were alone in the competition, and the creators were not able to help !!
 
-\[caption id="attachment\_6" align="alignnone" width="653"\]![Sad creators that couldn’t change their robots.](/images/2016/10/sad-creators.jpeg) Sad creators that couldn’t change their robots.\[/caption\]
+![Sad creators that couldn’t change their robots.](/images/2016/10/sad-creators.jpeg) Sad creators that couldn’t change their robots.\[/caption\]
 
 Robocode is fantastic, but after you pack your robot you cannot change it, it goes as it is to the combat zone. So the creators felt powerless, and that pain gave me the idea of create something like robocode but where you could change the code during the match, so the combat would be more interactive, and the relationship between the creator and the creature would be much more intense.
 
