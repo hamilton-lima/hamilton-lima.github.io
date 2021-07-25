@@ -72,4 +72,7 @@ Then at the end a `catch` with a `expect` in it, saying out loud: "This test exp
 
 For me this is the winner :)
 
+### References 
 
+- [Chai to.throw](https://www.chaijs.com/api/bdd/#method_throw)
+- [smallflatworld test code reference]()
