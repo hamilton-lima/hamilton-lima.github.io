@@ -22,8 +22,8 @@
 <meta name=twitter:description content="Beauty always promises, but never gives anything. Simone Weil
  Unlike beauty, javascript promises are faithful, and will be fulfilled&mldr; unless someone rejects it :) If you ever need to load images using javascript or did anything that needs to wait until something is done, you probably used a promise, maybe even without noticing. I see Promises as a nice way to simplify the callback hell, but don&rsquo;t be fooled, the callbacks are still there, they are only organized in a more simpler way.">
 <link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
-<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/hamilton-2022-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/hamilton-2022-16x16.png>
 <link rel=manifest href=/site.webmanifest>
 <link rel=mask-icon href=/safari-pinned-tab.svg color>
 <link rel="shortcut icon" href=/favicon.ico>
@@ -62,7 +62,7 @@
 <p>Beauty always promises, but never gives anything. <a href=https://en.wikipedia.org/wiki/Simone_Weil>Simone Weil</a></p>
 </blockquote>
 <p>Unlike beauty, javascript promises are faithful, and will be fulfilled&mldr; unless someone rejects it :) If you ever need to load images using javascript or did anything that needs to wait until something is done, you probably used a promise, maybe even without noticing. I see Promises as a nice way to simplify the <a href=http://callbackhell.com>callback hell</a>, but don&rsquo;t be fooled, the callbacks are still there, they are only organized in a more simpler way. Let´s take a look at a simple example that loads one image. consider that &ldquo;foo&rdquo; variable is a canvas where we draw something in memory and we want to show that as an image.</p>
-<pre><code>var promise = new Promise(function(resolve, reject) {   
+<pre tabindex=0><code>var promise = new Promise(function(resolve, reject) {   
     var image = new Image();
     image.onload = function() {
         resolve(image);
@@ -103,7 +103,7 @@ promise.then(function(data){
 </tbody>
 </table>
 <p>The great challenge was at the mask building where the code needed to wait for several promises to resolve and after that return a promise, so this is the implementation of the mask build.</p>
-<pre><code>this.build = function(width, height, data) {
+<pre tabindex=0><code>this.build = function(width, height, data) {
 	
 	var imagePromises = new Array();
 	
@@ -137,12 +137,12 @@ promise.then(function(data){
     }
 
 </code></pre><p>Let&rsquo;s talk about some important steps on this code:</p>
-<pre><code>imagePromises.push(this.tint(...
+<pre tabindex=0><code>imagePromises.push(this.tint(...
 </code></pre><p>The &ldquo;tint&rdquo; function returns a promise that will be resolved when the image painting is done. We add to the list of promises that we are waiting for.</p>
-<pre><code>var resultPromise = new Promise(function(resolve, reject) {
+<pre tabindex=0><code>var resultPromise = new Promise(function(resolve, reject) {
 	    Promise.all(imagePromises).then(function(images) {...
 </code></pre><p>The &ldquo;Promise.all&rdquo; function allow us to wait for a list of promises and do something at the &ldquo;then&rdquo; function, however, the parameter received at the function is the list of data each promise sends from &ldquo;resolve&rdquo; function. <img src=/images/2017/02/promises-image-to-promisse.all_.jpg alt> With &ldquo;Promise.all&rdquo; I was able to solve one problem that was wait for several other promises, but now I had another one how to transform the result list in one result that should be a &ldquo;promise&rdquo; result? The solution I found was to create a new promise with &ldquo;Promise.all&rdquo; inside so the resolve function would be available.</p>
-<pre><code>resolve(resultCanvas.toDataURL(&quot;image/png&quot;));
+<pre tabindex=0><code>resolve(resultCanvas.toDataURL(&quot;image/png&quot;));
 </code></pre><p>This resolve function is from the new promise, so when the &ldquo;then&rdquo; implementation of the &ldquo;Promise.all&rdquo; finished it will resolve this new promise sending the image as base64. If you know any other way around this, please let me know :)</p>
 </div>
 <hr class=post-end>
@@ -166,7 +166,7 @@ promise.then(function(data){
 </div>
 </main>
 <footer id=site-footer class="section-inner thin animated fadeIn faster">
-<p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
+<p>&copy; 2022 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
 <p>
 Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a>
 </p>

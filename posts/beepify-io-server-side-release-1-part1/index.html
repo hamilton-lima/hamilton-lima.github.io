@@ -22,8 +22,8 @@
 <meta name=twitter:description content="These are the server side release 1 original plan, that is complete with some minor changes highlighted on each line
  Install playframework environment - not in the original plan Create the models Read current location latitude, longitude Add sample data to the database - changed to use a service to create data instead of SQL to add data Create services Get data receive product code, latitude and longitude Return all prices  It´s impressive how environment setup takes time, usually we forget to include this step when planning projects, but believe me this takes of time in a project, let´s go over each step I did on this implementation.">
 <link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
-<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/hamilton-2022-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/hamilton-2022-16x16.png>
 <link rel=manifest href=/site.webmanifest>
 <link rel=mask-icon href=/safari-pinned-tab.svg color>
 <link rel="shortcut icon" href=/favicon.ico>
@@ -106,7 +106,7 @@ addSbtPlugin(&ldquo;com.typesafe.sbteclipse&rdquo; % &ldquo;sbteclipse-plugin&rd
 <p>After this finished go to eclipse and import the project to the Eclipse workspace</p>
 <h3 id=prepare-the-database>Prepare the database<a href=#prepare-the-database class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
 <p>Play apps can run with in memory databases, but I want to start with a more real example using mysql as database, the first thing to do is to create the database and the user that your application will use to store the data, I put together this script that I save in the docs folder of the project.</p>
-<pre><code>CREATE USER 'beepify\_user\_db'@'%' IDENTIFIED BY 'fFRbUPmS9BSHggR';
+<pre tabindex=0><code>CREATE USER 'beepify\_user\_db'@'%' IDENTIFIED BY 'fFRbUPmS9BSHggR';
 CREATE USER 'beepify\_user\_db'@'localhost' IDENTIFIED BY 'fFRbUPmS9BSHggR';
 
 CREATE SCHEMA db\_beepify DEFAULT CHARACTER SET utf8;
@@ -116,7 +116,7 @@ FLUSH PRIVILEGES;
 </code></pre><p>You can generate nice and <a href="https://www.random.org/passwords/?num=5&len=15&format=html&rnd=new">random passwords here</a>, and the above username, database names and passwords are not the ones I used :)</p>
 <p>Change play configuration to use the new database</p>
 <p><strong>change to match the following at conf/application.conf</strong></p>
-<pre><code>play.db {
+<pre tabindex=0><code>play.db {
   config = &quot;db&quot;
   default = &quot;default&quot;
 ... 
@@ -133,7 +133,7 @@ db {
 <p>Important comment on this configuration: ebean.default=&ldquo;models.*&rdquo; will indicate to Ebean framework, that is the ORM framework installed by default with Playframework, that the package models is used to store all of your models</p>
 </blockquote>
 <p><strong>add to build.sbt</strong></p>
-<pre><code>libraryDependencies += &quot;mysql&quot; % &quot;mysql-connector-java&quot; % &quot;5.1.36&quot;
+<pre tabindex=0><code>libraryDependencies += &quot;mysql&quot; % &quot;mysql-connector-java&quot; % &quot;5.1.36&quot;
 libraryDependencies += evolutions
 
 enablePlugins(PlayEbean)
@@ -160,7 +160,7 @@ enablePlugins(PlayEbean)
 </div>
 </main>
 <footer id=site-footer class="section-inner thin animated fadeIn faster">
-<p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
+<p>&copy; 2022 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
 <p>
 Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a>
 </p>

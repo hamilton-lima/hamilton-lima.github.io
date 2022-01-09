@@ -22,8 +22,8 @@ While coding some unit tests for the SmallFlatWorld server, I got myself in a ve
 <meta name=twitter:description content="If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, The definition of insanity - Far Cry 3.
 While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&mldr; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&rsquo;s kinda insane.">
 <link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
-<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/hamilton-2022-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/hamilton-2022-16x16.png>
 <link rel=manifest href=/site.webmanifest>
 <link rel=mask-icon href=/safari-pinned-tab.svg color>
 <link rel="shortcut icon" href=/favicon.ico>
@@ -70,14 +70,14 @@ If you ever played Farcry3 for sure you will remember the guy in the picture, if
 </ul>
 <h2 id=what-are-the-options-i-tried>What are the options I tried<a href=#what-are-the-options-i-tried class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h2>
 <h3 id=the-magician-bind>The magician bind!<a href=#the-magician-bind class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
-<pre><code>expect(this.storage.getStorage.bind(this.storage, &quot;foo&quot;)).to.throw(
+<pre tabindex=0><code>expect(this.storage.getStorage.bind(this.storage, &quot;foo&quot;)).to.throw(
   &quot;uuid dont exist in memory&quot;
 );
 </code></pre><p>If you look at the documentation you will find that <a href=https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind>bind</a> will create a new function, with the <code>this</code> reference you passed as argument, plus other arguments you give to it.</p>
 <p>In other words, a function in this case <code>getStorage</code> can be recycled to be used in other instance, so other <code>this</code> reference and be called by the <code>expect</code> function and then we can check for the the error using <code>to.throw</code>.</p>
 <p>As I don&rsquo;t <code>bind</code> most of the time, this solution seems very fuzzy, it works but I would need a quick read to recap, and answer my expected reaction to this code in couple months: &ldquo;Why on earth am I using <code>bind</code> here?&rdquo;</p>
 <h3 id=anonymous-functions-ftw>Anonymous functions FTW!<a href=#anonymous-functions-ftw class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
-<pre><code>const self = this;
+<pre tabindex=0><code>const self = this;
 expect(function () {
   self.storage.getStorage(&quot;foo&quot;);
 }).to.throw(&quot;uuid dont exist in memory&quot;);
@@ -91,7 +91,7 @@ expect(() =&gt; {
 <p>Sending functions as parameters sometimes feels like blackmagic, I know how it works but requires some brainpower to process it, and for me tests should not be a place to exercise theses powers.</p>
 <p><img src=/images/2021/you-have-no-power-here.jpg alt="Brain you have no power here"></p>
 <h3 id=the-verbose-but-clear>The verbose, but clear<a href=#the-verbose-but-clear class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h3>
-<pre><code>try {
+<pre tabindex=0><code>try {
   this.storage.getStorage(&quot;foo&quot;);
 } catch (error) {
   expect(error.message).to.be.equal(&quot;uuid dont exist in memory&quot;);
@@ -124,7 +124,7 @@ expect(() =&gt; {
 </div>
 </main>
 <footer id=site-footer class="section-inner thin animated fadeIn faster">
-<p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
+<p>&copy; 2022 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
 <p>
 Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a>
 </p>

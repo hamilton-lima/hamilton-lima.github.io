@@ -19,8 +19,8 @@
 <meta name=twitter:title content="Virtualbox with static and dynamic IP">
 <meta name=twitter:description content="While installing docker on my windows 10 machine I found that Docker for Windows requires 64-bit Windows 10 Pro with Hyper-V available, what? omg, I was expecting something simple&mldr; but NISBEIP, let&rsquo;s move on. Tried to use the Docker Toolbox that didn&rsquo;t work as smooth as I expected. After some hours banging my head against the wall I decided to create a Linux Virtual Machine using Virtualbox and use docker from there.">
 <link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png>
-<link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png>
-<link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=/hamilton-2022-32x32.png>
+<link rel=icon type=image/png sizes=16x16 href=/hamilton-2022-16x16.png>
 <link rel=manifest href=/site.webmanifest>
 <link rel=mask-icon href=/safari-pinned-tab.svg color>
 <link rel="shortcut icon" href=/favicon.ico>
@@ -71,12 +71,12 @@
 </ul>
 <h2 id=setting-up-the-fixed-ip>Setting up the fixed IP<a href=#setting-up-the-fixed-ip class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h2>
 <p>Make sure the Host-only network interface doesn&rsquo;t have DHCP server activated and there is a fixed IP assigned to the host machine, check this at Virtual box menu, Host Network Manager, yes this one is tricky it&rsquo;s not a Virtual Machine setting, is a Virtualbox setting. <img src=/images/2018/04/virtualbox_host_network_manager.png alt> Now that your Host-only network adapter is pretty much useless, let&rsquo;s make it usable by assigning an IP to the 192.168.56.X network. Using the <strong>ifconfig -a</strong> identify the interface name that doesn&rsquo;t have an IP assigned, mine was <strong>enp0s8.</strong> edit the file <strong>/etc/network/interfaces</strong> and add the following lines at the end</p>
-<pre><code>auto enp0s8
+<pre tabindex=0><code>auto enp0s8
 iface enp0s8 inet static
 address 192.168.56.100
 netmask 255.255.255.0
 </code></pre><p>restart your network service by using:</p>
-<pre><code>sudo service networkìng restart
+<pre tabindex=0><code>sudo service networkìng restart
 </code></pre><p>And now your Virtual machine is accessible thru the IP 192.168.56.100, add this to the hosts file at the windows machine and you can ssh to the machine that will have a fixed AND a dynamic IP from the Bridged network interface.</p>
 </div>
 <hr class=post-end>
@@ -100,7 +100,7 @@ netmask 255.255.255.0
 </div>
 </main>
 <footer id=site-footer class="section-inner thin animated fadeIn faster">
-<p>&copy; 2021 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
+<p>&copy; 2022 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p>
 <p>
 Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a>
 </p>
