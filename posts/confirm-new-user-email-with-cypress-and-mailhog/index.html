@@ -1,0 +1,176 @@
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=x-ua-compatible content="ie=edge"><meta name=theme-color content="#ffb703"><meta name=msapplication-TileColor content="#ffb703"><meta itemprop=name content="Confirm new user email with Cypress and MailHog"><meta itemprop=description content="I really like Cypress, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?
+So many options There are some posssibilities
+ Pay some email API services, oh GMAIL why you don&rsquo;t have it?"><meta itemprop=datePublished content="2022-05-08T09:09:09+00:00"><meta itemprop=dateModified content="2022-05-08T09:09:09+00:00"><meta itemprop=wordCount content="1088"><meta itemprop=keywords content="testing,email,cypress,mailhog,automation,"><meta property="og:title" content="Confirm new user email with Cypress and MailHog"><meta property="og:description" content="I really like Cypress, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?
+So many options There are some posssibilities
+ Pay some email API services, oh GMAIL why you don&rsquo;t have it?"><meta property="og:type" content="article"><meta property="og:url" content="https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2022-05-08T09:09:09+00:00"><meta property="article:modified_time" content="2022-05-08T09:09:09+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Confirm new user email with Cypress and MailHog"><meta name=twitter:description content="I really like Cypress, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?
+So many options There are some posssibilities
+ Pay some email API services, oh GMAIL why you don&rsquo;t have it?"><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/hamilton-2022-32x32.png><link rel=icon type=image/png sizes=16x16 href=/hamilton-2022-16x16.png><link rel=manifest href=/site.webmanifest><link rel=mask-icon href=/safari-pinned-tab.svg color><link rel="shortcut icon" href=/favicon.ico><title>Confirm new user email with Cypress and MailHog</title><link rel=stylesheet href=https://hamiltonlima.com/css/style.min.eac77496566fd7d5768fd650ddb0b2b181ca6a2d7c5fdd6fe6b8ba4bf47e566f.css integrity="sha256-6sd0llZv19V2j9ZQ3bCysYHKai18X91v5ri6S/R+Vm8=" crossorigin=anonymous></head><body id=page><header id=site-header class="animated slideInUp"><div class="hdr-wrapper section-inner"><div class=hdr-left><div class=site-branding><a href=https://hamiltonlima.com>Hamilton Lima</a></div><nav class="site-nav hide-in-mobile"><a href=https://hamiltonlima.com/posts>Posts</a></nav></div><div class="hdr-right hdr-icons"><span class="hdr-social hide-in-mobile"><a href=https://twitter.com/athanazio target=_blank rel="noopener me" title=Twitter><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9.0 01-3.14 1.53 4.48 4.48.0 00-7.86 3v1A10.66 10.66.0 013 4s-4 9 5 13a11.64 11.64.0 01-7 2c9 5 20 0 20-11.5a4.5 4.5.0 00-.08-.83A7.72 7.72.0 0023 3z"/></svg></a><a href=https://github.com/hamilton-lima target=_blank rel="noopener me" title=Github><svg xmlns="http://www.w3.org/2000/svg" class="feather" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37.0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44.0 0020 4.77 5.07 5.07.0 0019.91 1S18.73.65 16 2.48a13.38 13.38.0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07.0 005 4.77 5.44 5.44.0 003.5 8.55c0 5.42 3.3 6.61 6.44 7A3.37 3.37.0 009 18.13V22"/></svg></a></span><button id=menu-btn class=hdr-btn title=Menu><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-menu"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button></div></div></header><div id=mobile-menu class="animated fast"><ul><li><a href=https://hamiltonlima.com/posts>Posts</a></li></ul></div><main class="site-main section-inner animated fadeIn faster"><article class=thin><header class=post-header><div class=post-meta><span>May 8, 2022</span></div><h1>Confirm new user email with Cypress and MailHog</h1></header><div class=content><p>I really like <a href=https://cypress.io>Cypress</a>, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?</p><p><img src=/images/2022/user-creation-automation-steps-cypress.jpg alt="Gru showing steps of user creation with cypress"></p><h2 id=so-many-options>So many options<a href=#so-many-options class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h2><p>There are some posssibilities</p><ul><li>Pay some email API services, oh GMAIL why you don&rsquo;t have it?</li><li>Navigate to mailinator webpage, parse the HTML and find the email, I need internet for this.</li><li>Pay mailinator API, did that in the past, works just fine, but you know&mldr; money.</li></ul><p>Then some revelation come, not really just research on options, why not use a local email server then build an API to get the email contents? The first one that came to mind is <a href=https://james.apache.org/>James</a> very stable email server, save data in the database, so it would be super easy to extract the messages, but why not an existing solution that is email server AND already have the API?</p><p>Then I found <a href=https://github.com/mailhog/MailHog>MAILHOG</a>! Email server with API to fetch the data, oh this is good, very good :)</p><h2 id=how-it-works>How it works?<a href=#how-it-works class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h2><p>So let&rsquo;s see the entire process, with some quick notes</p><ul><li>Start email server, docker-compose is your friend, this is the image: <code>mailhog/mailhog:v1.0.1</code> and these are the ports: 1025 and 8025</li><li>we delete all messages from the local email server, call DELETE using <code>/api/v1/messages</code></li><li>visit the user creation page, <code>cy.visit()</code></li><li>enter the data for the new user, generate some fake date with <code>@faker-js/faker</code> then use multiple <code>cy.get().type()</code></li><li>submit the form, <code>cy.get().click()</code></li><li>confirm that the API finished with success, <code>cy.intercept()</code> and <code>cy.wait()</code></li><li>the API will send and email to our mailhog local server, included a environment variable use <a href=https://nodemailer.com>nodemailer</a> to send the messages to the test server instead of <a href=https://www.mailgun.com>mailgun</a></li><li>get email received to the created user, call GET <code>/api/v1/messages</code> then <code>/api/v1/messages/{id}</code></li><li>find the confirmation link in the email, decode from <code>quotedPrintable</code> then parse the HTML using <a href=https://cheerio.js.org>cherio</a></li><li>visit the link, <code>cy.visit()</code></li><li>login with the new account</li></ul><h2 id=show-me-the-code>Show me the code<a href=#show-me-the-code class=anchor aria-hidden=true><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 015 5 5 5 0 01-5 5h-3m-6 0H6a5 5 0 01-5-5 5 5 0 015-5h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a></h2><p>Docker compose for the the email</p><pre tabindex=0><code>  email:
+    container_name: email
+    image: mailhog/mailhog:v1.0.1    
+    ports:
+      - 1025:1025
+      - 8025:8025
+    logging:
+      driver: &#34;json-file&#34;
+      options:
+        max-size: &#34;200k&#34;
+        max-file: &#34;10&#34;
+</code></pre><p>Delete all the emails</p><pre tabindex=0><code>cy.task(&#39;deleteAllEmails&#39;, email).then(response =&gt; {
+  cy.log(`All emails deleted from the mail box ${response}`);
+})
+
+// code in the plugin
+...
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+</code></pre><p>Visiting the signup page</p><pre tabindex=0><code>  beforeEach(() =&gt; {
+    cy.visit(`${host}/signup/newuser`);
+  })
+</code></pre><p>Generating fake data and entering in the fields, remember to add the <code>id</code> to the input fields, there is always to option to use the <a href=https://docs.cypress.io/guides/references/best-practices#Selecting-Elements>recommended cypress strategy</a>, <code>cy.get('[data-cy=submit]').click()</code> but I prefer the syntax using the id <code>cy.get('#submit]').click()</code> as most of the time with the new frameworks we pretty much don&rsquo;t change component id, then this field is less volatile, and the syntax seems more readable.</p><pre tabindex=0><code>  let email;
+  let password;
+  let firstName;
+  let lastName;
+
+  before(() =&gt; {
+    password = faker.internet.password();
+    firstName = faker.name.findName();
+    lastName = faker.name.findName();
+    email = faker.internet.email(firstName, lastName, &#39;host.docker.internal&#39;);
+  })
+
+... 
+    cy.get(&#39;#firstName&#39;).type(firstName);
+    cy.get(&#39;#lastName&#39;).type(lastName);
+    cy.get(&#39;#email&#39;).type(email);
+    cy.get(&#39;#password&#39;).type(password);
+</code></pre><p>Submit the form and check if the API finished without problems</p><pre tabindex=0><code>    cy.intercept(&#39;POST&#39;, &#39;**/user/create*&#39;).as(&#39;CREATE&#39;)
+    cy.get(&#39;#submit&#39;).click();
+    cy.wait(&#39;@CREATE&#39;).its(&#39;response.statusCode&#39;).should(&#39;be.oneOf&#39;, [201])
+</code></pre><p>Nodemailer sending email to local server WITHOUT authentication, note that it uses the same data structure as mailgun</p><pre tabindex=0><code>  async sendEmail(data: MailgunData): Promise&lt;string&gt; {
+    try {
+      this.logger.log(`Send email local ${data.subject} TO: ${data.to}`);
+
+      const transporter = nodemailer.createTransport({
+        port: 1025,
+        host: &#39;host.docker.internal&#39;,
+        secure: false,
+      });
+
+      const result = await transporter.sendMail(data);
+      this.logger.log(`Email sent ${JSON.stringify(result)}`);
+ 
+      return result;
+    } catch (error) {
+      this.logger.error(&#39;Error when sending the notification&#39;, error);
+    }
+  }
+...
+export class MailgunData {
+  subject: string;
+  from: string;
+  to: string;
+  text: string;
+  html: string;
+}  
+</code></pre><p>Getting the email messages</p><pre tabindex=0><code>  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+  ...
+  // do some data massage to get the email ID, see the plugin full code at the end of this.
+  ... 
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+  result = data;
+</code></pre><p>DECODE the <a href=https://www.npmjs.com/package/quoted-printable>quotedPrintable</a> then parse the HTML using <a href=https://cheerio.js.org>cherio</a>, OMG this one took some time, read some more here <a href=https://en.wikipedia.org/wiki/Quoted-printable>Quoted Printable</a>, in summary if you see <code>=3D</code> all over the HTML message there is a good chance you need to decode it :)</p><p>After the decoding there was the challenge of parsing the message HTML, cypress offers this but not in the plugin code, so then I used <a href=https://cheerio.js.org>cherio</a>, my new friend, to parse the HTML, this is such a nicely done piece of technology, simple and very resourcefull. it works just as expected, feed in the HTML, get a parsed object, do queries to find elements, receive a LIST get the one you want and boom retrieve some attributes.</p><p>See the code, it speaks for it self</p><pre tabindex=0><code>const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+</code></pre><p>BONUS - create a plugin for cypress</p><p>Add this to your <code>plugins/index.js</code></p><pre tabindex=0><code>/// &lt;reference types=&#34;cypress&#34; /&gt;
+const mailHogAPI = require(&#39;./mail-hog.api&#39;)
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
+module.exports = (on, config) =&gt; {
+  on(&#34;task&#34;, {
+    async &#34;getEmail&#34;(to) {
+      return await mailHogAPI.getEmail(to);
+    },
+    async &#34;deleteAllEmails&#34;() {
+      return await mailHogAPI.deleteAllEmails();
+    },
+    async &#34;getLinkFromEmail&#34;({ email, tag }) {
+      return mailHogAPI.getLinkFromEmail(email, tag);
+    }
+  })
+};
+</code></pre><p>And the plugin file itself <code>plugins/mail-hog.api.js</code></p><pre tabindex=0><code>const axios = require(&#34;axios&#34;);
+const cheerio = require(&#39;cheerio&#39;);
+var quotedPrintable = require(&#39;quoted-printable&#39;);
+var utf8 = require(&#39;utf8&#39;);
+
+const MAILHOG_HOST = process.env.MAILHOG_HOST || &#39;http://host.docker.internal:8025&#39;;
+// See API documentation here https://github.com/mailhog/MailHog/blob/master/docs/APIv1.md
+
+const getEmail = async (to) =&gt; {
+  if (!to) {
+    return;
+  } else {
+    to = to.toLowerCase();
+  }
+
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+
+  let id = null;
+  let result = null;
+
+  // search path []{ID,Raw:[{To:[string]}]}
+  if (data) {
+    for (let message of data) {
+      if (message.Raw &amp;&amp; message.Raw.To) {
+        if (message.Raw.To.includes(to)) {
+          id = message.ID;
+          break;
+        }
+      }
+    }
+  }
+
+  if (id) {
+    const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+    result = data;
+  }
+  return result;
+};
+
+// tagSelector, see https://cheerio.js.org/
+const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+
+module.exports = { getEmail, deleteAllEmails, getLinkFromEmail };
+</code></pre><p>Now you can use it like this in your test code</p><pre tabindex=0><code>    cy.task(&#39;getEmail&#39;, email).then(response =&gt; {
+      expect(response).to.exist;
+      cy.log(`Email found ${response.ID}`);
+
+      cy.task(&#39;getLinkFromEmail&#39;, { email: response, tag: &#39;#button&#39; }).then(url =&gt; {
+        cy.log(&#39;Account confirmation URL&#39;, url);
+        cy.visit(url);
+      })
+    });
+</code></pre><p>Enjoy!</p><p><img src=/images/2022/hog.png alt=hog></p></div><hr class=post-end><footer class=post-info><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83.0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7" y2="7"/></svg><span class=tag><a href=https://hamiltonlima.com/tags/testing>testing</a></span><span class=tag><a href=https://hamiltonlima.com/tags/email>email</a></span><span class=tag><a href=https://hamiltonlima.com/tags/cypress>cypress</a></span><span class=tag><a href=https://hamiltonlima.com/tags/mailhog>mailhog</a></span><span class=tag><a href=https://hamiltonlima.com/tags/automation>automation</a></span></p><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6A2 2 0 004 4v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>1088 Words</p><p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2022-05-08 09:09 +0000</p></footer></article><div class="post-nav thin"><a class=prev-post href=https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/><span class=post-nav-label>Older&nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><br><span>Avoid insanity when handling errors with Chai</span></a></div><div id=comments class=thin></div></main><footer id=site-footer class="section-inner thin animated fadeIn faster"><p>&copy; 2022 <a href=https://hamiltonlima.com>Hamilton Lima</a> &#183; <a href=https://creativecommons.org/licenses/by-nc/4.0/ target=_blank rel=noopener>CC BY-NC 4.0</a></p><p>Made with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a> &#183; Theme <a href=https://github.com/Track3/hermit target=_blank rel=noopener>Hermit</a> &#183; <a href=https://hamiltonlima.com/posts/index.xml target=_blank title=rss><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg></a></p></footer><script src=https://hamiltonlima.com/js/bundle.min.5a42c67b729ee2fa1059251688235399704707e04edb4e28c42c6f6dfa49d1d9.js integrity="sha256-WkLGe3Ke4voQWSUWiCNTmXBHB+BO204oxCxvbfpJ0dk=" crossorigin=anonymous></script></body></html>

@@ -1,4 +1,218 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hamilton Lima</title><link>https://hamiltonlima.com/posts/</link><description>Recent content in Posts on Hamilton Lima</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 25 Jul 2021 10:34:00 +0000</lastBuildDate><atom:link href="https://hamiltonlima.com/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Avoid insanity when handling errors with Chai</title><link>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</link><pubDate>Sun, 25 Jul 2021 10:34:00 +0000</pubDate><guid>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</guid><description>If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, The definition of insanity - Far Cry 3.
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hamilton Lima</title><link>https://hamiltonlima.com/posts/</link><description>Recent content in Posts on Hamilton Lima</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Sun, 08 May 2022 09:09:09 +0000</lastBuildDate><atom:link href="https://hamiltonlima.com/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Confirm new user email with Cypress and MailHog</title><link>https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/</link><pubDate>Sun, 08 May 2022 09:09:09 +0000</pubDate><guid>https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/</guid><description>I really like Cypress, The tool is interactive, very developer friendly even if you don&amp;rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&amp;hellip; create new USERS&amp;hellip; oh wait CREATE NEW USERS, how on earth I will validate the user email?
+So many options There are some posssibilities
+Pay some email API services, oh GMAIL why you don&amp;rsquo;t have it?</description><content type="html"><![CDATA[<p>I really like <a href="https://cypress.io">Cypress</a>, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&hellip; create new USERS&hellip; oh wait CREATE NEW USERS, how on earth I will validate the user email?</p>
+<p><img src="/images/2022/user-creation-automation-steps-cypress.jpg" alt="Gru showing steps of user creation with cypress"></p>
+<h2 id="so-many-options">So many options</h2>
+<p>There are some posssibilities</p>
+<ul>
+<li>Pay some email API services, oh GMAIL why you don&rsquo;t have it?</li>
+<li>Navigate to mailinator webpage, parse the HTML and find the email, I need internet for this.</li>
+<li>Pay mailinator API, did that in the past, works just fine, but you know&hellip; money.</li>
+</ul>
+<p>Then some revelation come, not really just research on options, why not use a local email server then build an API to get the email contents? The first one that came to mind is <a href="https://james.apache.org/">James</a> very stable email server, save data in the database, so it would be super easy to extract the messages, but why not an existing solution that is email server AND already have the API?</p>
+<p>Then I found <a href="https://github.com/mailhog/MailHog">MAILHOG</a>! Email server with API to fetch the data, oh this is good, very good :)</p>
+<h2 id="how-it-works">How it works?</h2>
+<p>So let&rsquo;s see the entire process, with some quick notes</p>
+<ul>
+<li>Start email server, docker-compose is your friend, this is the image: <code>mailhog/mailhog:v1.0.1</code> and these are the ports: 1025 and 8025</li>
+<li>we delete all messages from the local email server, call DELETE using <code>/api/v1/messages</code></li>
+<li>visit the user creation page, <code>cy.visit()</code></li>
+<li>enter the data for the new user, generate some fake date with <code>@faker-js/faker</code> then use multiple <code>cy.get().type()</code></li>
+<li>submit the form, <code>cy.get().click()</code></li>
+<li>confirm that the API finished with success, <code>cy.intercept()</code> and <code>cy.wait()</code></li>
+<li>the API will send and email to our mailhog local server, included a environment variable use <a href="https://nodemailer.com">nodemailer</a> to send the messages to the test server instead of <a href="https://www.mailgun.com">mailgun</a></li>
+<li>get email received to the created user, call GET <code>/api/v1/messages</code> then <code>/api/v1/messages/{id}</code></li>
+<li>find the confirmation link in the email, decode from <code>quotedPrintable</code> then parse the HTML using <a href="https://cheerio.js.org">cherio</a></li>
+<li>visit the link, <code>cy.visit()</code></li>
+<li>login with the new account</li>
+</ul>
+<h2 id="show-me-the-code">Show me the code</h2>
+<p>Docker compose for the the email</p>
+<pre tabindex="0"><code>  email:
+    container_name: email
+    image: mailhog/mailhog:v1.0.1    
+    ports:
+      - 1025:1025
+      - 8025:8025
+    logging:
+      driver: &#34;json-file&#34;
+      options:
+        max-size: &#34;200k&#34;
+        max-file: &#34;10&#34;
+</code></pre><p>Delete all the emails</p>
+<pre tabindex="0"><code>cy.task(&#39;deleteAllEmails&#39;, email).then(response =&gt; {
+  cy.log(`All emails deleted from the mail box ${response}`);
+})
+
+// code in the plugin
+...
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+</code></pre><p>Visiting the signup page</p>
+<pre tabindex="0"><code>  beforeEach(() =&gt; {
+    cy.visit(`${host}/signup/newuser`);
+  })
+</code></pre><p>Generating fake data and entering in the fields, remember to add the <code>id</code> to the input fields, there is always to option to use the <a href="https://docs.cypress.io/guides/references/best-practices#Selecting-Elements">recommended cypress strategy</a>, <code>cy.get('[data-cy=submit]').click()</code> but I prefer the syntax using the id <code>cy.get('#submit]').click()</code> as most of the time with the new frameworks we pretty much don&rsquo;t change component id, then this field is less volatile, and the syntax seems more readable.</p>
+<pre tabindex="0"><code>  let email;
+  let password;
+  let firstName;
+  let lastName;
+
+  before(() =&gt; {
+    password = faker.internet.password();
+    firstName = faker.name.findName();
+    lastName = faker.name.findName();
+    email = faker.internet.email(firstName, lastName, &#39;host.docker.internal&#39;);
+  })
+
+... 
+    cy.get(&#39;#firstName&#39;).type(firstName);
+    cy.get(&#39;#lastName&#39;).type(lastName);
+    cy.get(&#39;#email&#39;).type(email);
+    cy.get(&#39;#password&#39;).type(password);
+</code></pre><p>Submit the form and check if the API finished without problems</p>
+<pre tabindex="0"><code>    cy.intercept(&#39;POST&#39;, &#39;**/user/create*&#39;).as(&#39;CREATE&#39;)
+    cy.get(&#39;#submit&#39;).click();
+    cy.wait(&#39;@CREATE&#39;).its(&#39;response.statusCode&#39;).should(&#39;be.oneOf&#39;, [201])
+</code></pre><p>Nodemailer sending email to local server WITHOUT authentication, note that it uses the same data structure as mailgun</p>
+<pre tabindex="0"><code>  async sendEmail(data: MailgunData): Promise&lt;string&gt; {
+    try {
+      this.logger.log(`Send email local ${data.subject} TO: ${data.to}`);
+
+      const transporter = nodemailer.createTransport({
+        port: 1025,
+        host: &#39;host.docker.internal&#39;,
+        secure: false,
+      });
+
+      const result = await transporter.sendMail(data);
+      this.logger.log(`Email sent ${JSON.stringify(result)}`);
+ 
+      return result;
+    } catch (error) {
+      this.logger.error(&#39;Error when sending the notification&#39;, error);
+    }
+  }
+...
+export class MailgunData {
+  subject: string;
+  from: string;
+  to: string;
+  text: string;
+  html: string;
+}  
+</code></pre><p>Getting the email messages</p>
+<pre tabindex="0"><code>  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+  ...
+  // do some data massage to get the email ID, see the plugin full code at the end of this.
+  ... 
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+  result = data;
+</code></pre><p>DECODE the <a href="https://www.npmjs.com/package/quoted-printable">quotedPrintable</a> then parse the HTML using <a href="https://cheerio.js.org">cherio</a>, OMG this one took some time, read some more here <a href="https://en.wikipedia.org/wiki/Quoted-printable">Quoted Printable</a>, in summary if you see <code>=3D</code> all over the HTML message there is a good chance you need to decode it :)</p>
+<p>After the decoding there was the challenge of parsing the message HTML, cypress offers this but not in the plugin code, so then I used <a href="https://cheerio.js.org">cherio</a>, my new friend, to parse the HTML, this is such a nicely done piece of technology, simple and very resourcefull. it works just as expected, feed in the HTML, get a parsed object, do queries to find elements, receive a LIST get the one you want and boom retrieve some attributes.</p>
+<p>See the code, it speaks for it self</p>
+<pre tabindex="0"><code>const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+</code></pre><p>BONUS - create a plugin for cypress</p>
+<p>Add this to your <code>plugins/index.js</code></p>
+<pre tabindex="0"><code>/// &lt;reference types=&#34;cypress&#34; /&gt;
+const mailHogAPI = require(&#39;./mail-hog.api&#39;)
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
+module.exports = (on, config) =&gt; {
+  on(&#34;task&#34;, {
+    async &#34;getEmail&#34;(to) {
+      return await mailHogAPI.getEmail(to);
+    },
+    async &#34;deleteAllEmails&#34;() {
+      return await mailHogAPI.deleteAllEmails();
+    },
+    async &#34;getLinkFromEmail&#34;({ email, tag }) {
+      return mailHogAPI.getLinkFromEmail(email, tag);
+    }
+  })
+};
+</code></pre><p>And the plugin file itself <code>plugins/mail-hog.api.js</code></p>
+<pre tabindex="0"><code>const axios = require(&#34;axios&#34;);
+const cheerio = require(&#39;cheerio&#39;);
+var quotedPrintable = require(&#39;quoted-printable&#39;);
+var utf8 = require(&#39;utf8&#39;);
+
+const MAILHOG_HOST = process.env.MAILHOG_HOST || &#39;http://host.docker.internal:8025&#39;;
+// See API documentation here https://github.com/mailhog/MailHog/blob/master/docs/APIv1.md
+
+const getEmail = async (to) =&gt; {
+  if (!to) {
+    return;
+  } else {
+    to = to.toLowerCase();
+  }
+
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+
+  let id = null;
+  let result = null;
+
+  // search path []{ID,Raw:[{To:[string]}]}
+  if (data) {
+    for (let message of data) {
+      if (message.Raw &amp;&amp; message.Raw.To) {
+        if (message.Raw.To.includes(to)) {
+          id = message.ID;
+          break;
+        }
+      }
+    }
+  }
+
+  if (id) {
+    const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+    result = data;
+  }
+  return result;
+};
+
+// tagSelector, see https://cheerio.js.org/
+const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+
+module.exports = { getEmail, deleteAllEmails, getLinkFromEmail };
+</code></pre><p>Now you can use it like this in your test code</p>
+<pre tabindex="0"><code>    cy.task(&#39;getEmail&#39;, email).then(response =&gt; {
+      expect(response).to.exist;
+      cy.log(`Email found ${response.ID}`);
+
+      cy.task(&#39;getLinkFromEmail&#39;, { email: response, tag: &#39;#button&#39; }).then(url =&gt; {
+        cy.log(&#39;Account confirmation URL&#39;, url);
+        cy.visit(url);
+      })
+    });
+</code></pre><p>Enjoy!</p>
+<p><img src="/images/2022/hog.png" alt="hog"></p>
+]]></content></item><item><title>Avoid insanity when handling errors with Chai</title><link>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</link><pubDate>Sun, 25 Jul 2021 10:34:00 +0000</pubDate><guid>https://hamiltonlima.com/posts/avoid-insanity-when-handling-errors-with-chai/</guid><description>If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, The definition of insanity - Far Cry 3.
 While coding some unit tests for the SmallFlatWorld server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&amp;hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&amp;rsquo;s kinda insane.</description><content type="html"><![CDATA[<p><img src="/images/2021/insanity.png" alt="Vaas from Farcry3">
 If you ever played Farcry3 for sure you will remember the guy in the picture, if you never hear about him, Take a look on this video, <a href="https://www.youtube.com/watch?v=itjmKlYjUak">The definition of insanity - Far Cry 3</a>.</p>
 <p>While coding some unit tests for the <a href="https://github.com/hamilton-lima/smallflatworld">SmallFlatWorld</a> server, I got myself in a very interesting situation, where my old Java memories guided me to implement a test in a specific way, while some documentation was pointing in another direction&hellip; Well Vaas has a point, repeating the same thing over and over and expecting the same results it&rsquo;s kinda insane. Then I try multiple ways to do the same thing, let&rsquo;s take a look.</p>
@@ -11,8 +225,8 @@ If you ever played Farcry3 for sure you will remember the guy in the picture, if
 </ul>
 <h2 id="what-are-the-options-i-tried">What are the options I tried</h2>
 <h3 id="the-magician-bind">The magician bind!</h3>
-<pre tabindex="0"><code>expect(this.storage.getStorage.bind(this.storage, &quot;foo&quot;)).to.throw(
-  &quot;uuid dont exist in memory&quot;
+<pre tabindex="0"><code>expect(this.storage.getStorage.bind(this.storage, &#34;foo&#34;)).to.throw(
+  &#34;uuid dont exist in memory&#34;
 );
 </code></pre><p>If you look at the documentation you will find that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_objects/Function/bind">bind</a> will create a new function, with the <code>this</code> reference you passed as argument, plus other arguments you give to it.</p>
 <p>In other words, a function in this case <code>getStorage</code> can be recycled to be used in other instance, so other <code>this</code> reference and be called by the <code>expect</code> function and then we can check for the the error using <code>to.throw</code>.</p>
@@ -20,12 +234,12 @@ If you ever played Farcry3 for sure you will remember the guy in the picture, if
 <h3 id="anonymous-functions-ftw">Anonymous functions FTW!</h3>
 <pre tabindex="0"><code>const self = this;
 expect(function () {
-  self.storage.getStorage(&quot;foo&quot;);
-}).to.throw(&quot;uuid dont exist in memory&quot;);
+  self.storage.getStorage(&#34;foo&#34;);
+}).to.throw(&#34;uuid dont exist in memory&#34;);
 
 expect(() =&gt; {
-  this.storage.getStorage(&quot;foo&quot;);
-}).to.throw(&quot;uuid dont exist in memory&quot;);
+  this.storage.getStorage(&#34;foo&#34;);
+}).to.throw(&#34;uuid dont exist in memory&#34;);
 </code></pre><p>Both solutions here rely on creating an anonymous function, and letting <code>expect</code> to execute them.</p>
 <p>But there is a gotcha, there is always a gotcha, when you create a function using <code>function ()</code> syntax, and you code is running on stric mode, that function <code>this</code> will be <code>undefined</code>! for this reason you can see a not so cool workaround, as know as patch and for me a fine example of <a href="https://gist.github.com/banaslee/4147370">Go horse programming</a>, the <code>const self = this</code>. that provides the existing <code>this</code> reference to the function.</p>
 <p>The second version, using the arrow syntax, as defined here <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">Arrow functions</a> does NOT have it&rsquo;s own <code>this</code> reference, so it will rely on the existing one, and that would work just fine.</p>
@@ -33,9 +247,9 @@ expect(() =&gt; {
 <p><img src="/images/2021/you-have-no-power-here.jpg" alt="Brain you have no power here"></p>
 <h3 id="the-verbose-but-clear">The verbose, but clear</h3>
 <pre tabindex="0"><code>try {
-  this.storage.getStorage(&quot;foo&quot;);
+  this.storage.getStorage(&#34;foo&#34;);
 } catch (error) {
-  expect(error.message).to.be.equal(&quot;uuid dont exist in memory&quot;);
+  expect(error.message).to.be.equal(&#34;uuid dont exist in memory&#34;);
 }
 </code></pre><p>This is the verbose version, but very clear what is going on, the code starts with <code>try {</code>, even if you don&rsquo;t know the language, or if you are very tired, or watching a video while reading the code, you will be able to understand that something is expected to go wrong in the next lines.</p>
 <p>The piece of code that is under test is called the same way it will be used in other parts of the code, so again no magic here, no mental transformation, no extra variables to hunt you with the question, will this impact the test? just a function call <code>this.storage.getStorage(&quot;foo&quot;);</code></p>
@@ -111,7 +325,7 @@ subscriber.start();
 <p>The initial expectation was to build a unit test, but the final implementation is actually and End2End, and actually, a Redis server is used in the test. To have the Redis server running for the test the class <a href="https://github.com/hamilton-lima/robolucha/blob/master/src/runner/src-test/com/robolucha/publisher/RedisDockerHelper.java">RedisDockerHelper</a> was created to wrap the docker commands to start and stop a Redis server, meaning that in the test the usage is only .start() and .stop(), see class <a href="https://github.com/hamilton-lima/robolucha/blob/master/src/runner/src-test/com/robolucha/publisher/RedisDockerHelper.java">RedisDockerHelper</a> that run the docker commands and logs the console outputs. Here are some fragments from the test</p>
 <pre tabindex="0"><code>try (RemoteQueue queue = new RemoteQueue(Config.getInstance())) {
 </code></pre><p>Execute the code using <a href="https://github.com/hamilton-lima/robolucha/blob/master/src/runner/src/com/robolucha/publisher/RemoteQueue.java">the RemoteQueue</a> instance as an <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/AutoCloseable.html">AutoCloseable</a> so when the block finishes the close() the method from the object will be called releasing the <a href="https://github.com/xetorthio/jedis">Jedis</a> pools from memory.</p>
-<pre tabindex="0"><code>assertEquals(&quot;subscribe&quot;, future.get(5, TimeUnit.SECONDS));
+<pre tabindex="0"><code>assertEquals(&#34;subscribe&#34;, future.get(5, TimeUnit.SECONDS));
 </code></pre><p>This assertion will wait for the future object (<a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html">CompletableFuture</a>) to be fulfilled or for the timeout of 5 seconds, whatever comes first. This is an elegant way to keep the unit test waiting for the pub and subprocess to end. Note that inside the accept method the future is fulfilled with the command future.complete(&ldquo;subscribe&rdquo;); See the complete test here: <a href="https://github.com/hamilton-lima/robolucha/blob/master/src/runner/src-test/com/robolucha/publisher/RemoteQueueTest.java">RemoteQueueTest</a></p>
 <h2 id="complete-aka-last-words">.complete() a.k.a. last words</h2>
 <p>There were lots of interesting challenges in this implementation, but for me, the most interesting one was the use of generics with Observables for the subscription process, It&rsquo;s nice to see fragments like this:</p>
@@ -151,7 +365,7 @@ Unlike beauty, javascript promises are faithful, and will be fulfilled&amp;hell
     image.onload = function() {
         resolve(image);
     }
-    image.src = foo.toDataURL(&quot;image/png&quot;);
+    image.src = foo.toDataURL(&#34;image/png&#34;);
 });
 ...
 promise.then(function(data){
@@ -202,10 +416,10 @@ promise.then(function(data){
 	
 	var resultPromise = new Promise(function(resolve, reject) {
 	    Promise.all(imagePromises).then(function(images) {
-		var resultCanvas = document.createElement(&quot;canvas&quot;);
+		var resultCanvas = document.createElement(&#34;canvas&#34;);
 		resultCanvas.width = width;
 		resultCanvas.height = height;
-		var ctx = resultCanvas.getContext('2d');
+		var ctx = resultCanvas.getContext(&#39;2d&#39;);
 		ctx.imageSmoothingEnabled = true;
 		
 		for (var i = 0; i &lt; data.length; i++) {
@@ -213,20 +427,19 @@ promise.then(function(data){
 		}
 		
 		// return the base64 string of the image
-		resolve(resultCanvas.toDataURL(&quot;image/png&quot;));
+		resolve(resultCanvas.toDataURL(&#34;image/png&#34;));
 	    });
 	});
 	
 	return resultPromise;
     }
-
 </code></pre><p>Let&rsquo;s talk about some important steps on this code:</p>
 <pre tabindex="0"><code>imagePromises.push(this.tint(...
 </code></pre><p>The &ldquo;tint&rdquo; function returns a promise that will be resolved when the image painting is done. We add to the list of promises that we are waiting for.</p>
 <pre tabindex="0"><code>var resultPromise = new Promise(function(resolve, reject) {
 	    Promise.all(imagePromises).then(function(images) {...
 </code></pre><p>The &ldquo;Promise.all&rdquo; function allow us to wait for a list of promises and do something at the &ldquo;then&rdquo; function, however, the parameter received at the function is the list of data each promise sends from &ldquo;resolve&rdquo; function. <img src="/images/2017/02/promises-image-to-promisse.all_.jpg" alt=""> With &ldquo;Promise.all&rdquo; I was able to solve one problem that was wait for several other promises, but now I had another one how to transform the result list in one result that should be a &ldquo;promise&rdquo; result? The solution I found was to create a new promise with &ldquo;Promise.all&rdquo; inside so the resolve function would be available.</p>
-<pre tabindex="0"><code>resolve(resultCanvas.toDataURL(&quot;image/png&quot;));
+<pre tabindex="0"><code>resolve(resultCanvas.toDataURL(&#34;image/png&#34;));
 </code></pre><p>This resolve function is from the new promise, so when the &ldquo;then&rdquo; implementation of the &ldquo;Promise.all&rdquo; finished it will resolve this new promise sending the image as base64. If you know any other way around this, please let me know :)</p>
 ]]></content></item><item><title>beepify.io source code available</title><link>https://hamiltonlima.com/posts/beepify-io-source-code-available/</link><pubDate>Mon, 02 Jan 2017 22:21:50 +0000</pubDate><guid>https://hamiltonlima.com/posts/beepify-io-source-code-available/</guid><description>All the source code from the beepify posts is available at: https://github.com/hamilton-lima/beepify-server-playframework See the related posts:
 beepify.io, server side - part 1 beepify.io, server side - part 2</description><content type="html"><![CDATA[<p>All the source code from the beepify posts is available at: <a href="https://github.com/hamilton-lima/beepify-server-playframework">https://github.com/hamilton-lima/beepify-server-playframework</a> See the related posts:</p>
@@ -256,7 +469,7 @@ Now the details&amp;hellip; I have several, around 100 junit tests in Robolucha 
 
   @Override
   public String getTableTypeString() {
-    return &quot; ENGINE=MyISAM&quot;;
+    return &#34; ENGINE=MyISAM&#34;;
   }
 }
 </code></pre><p>Used a similar strategy for the in memory tables, with an extra detail that in <a href="http://dev.mysql.com/doc/refman/5.7/en/memory-storage-engine.html">Memory table DON´T support BLOB types</a>, so I need to create a custom mapping for large strings to use VARCHAR(1024) instead of BLOB.</p>
@@ -268,7 +481,7 @@ Now the details&amp;hellip; I have several, around 100 junit tests in Robolucha 
 
   @Override
   public String getTableTypeString() {
-    return &quot; ENGINE=MEMORY&quot;;
+    return &#34; ENGINE=MEMORY&#34;;
   }
 
  /\*\*
@@ -276,9 +489,9 @@ Now the details&amp;hellip; I have several, around 100 junit tests in Robolucha 
   \*/
   @Override
   protected void registerVarcharTypes() {
-    registerColumnType(Types.VARCHAR, &quot;varchar(1024)&quot;);
-    registerColumnType(Types.VARCHAR, 255, &quot;varchar($l)&quot;);
-    registerColumnType(Types.LONGVARCHAR, &quot;varchar(1024)&quot;);
+    registerColumnType(Types.VARCHAR, &#34;varchar(1024)&#34;);
+    registerColumnType(Types.VARCHAR, 255, &#34;varchar($l)&#34;);
+    registerColumnType(Types.LONGVARCHAR, &#34;varchar(1024)&#34;);
   }
 }
 </code></pre><h3 id="conclusion">Conclusion</h3>
@@ -317,15 +530,15 @@ post about the selfhackaton itself describing the goals (done) merge move() and 
 <p>Jenkins installs as a service at windows, using only 4Mb of memory, starts and stops in some seconds, and offers a nice web admin interface. Just follow the install steps, copy the token data from the install file, and you are good to go. As we will use <a href="http://ant.apache.org/">apache ant</a> to write our scripts we will need to install it as well. Just <a href="http://ant.apache.org/bindownload.cgi">download the the zip version</a>, unzip and add the ant <strong>bin</strong> folder to the path. mine is at : C:\app\apache-ant-1.9.7\bin</p>
 <h3 id="add-projects">Add projects</h3>
 <p>For each of my automation needs I will add a separated Project on Jenkins, and each one will have a build step to run a ant script. So I will use one ant script for each task I want to acomplish. Use the option <strong>add new Item</strong>, choose <strong>FreeStyle project</strong> and click ok. <img src="/images/2016/12/jenkins-add-new-job.png" alt=""> Now we setup what the job will do on <strong>Build</strong> option, choose <strong>Add build Step</strong> and pick <strong>Invoke Ant</strong> option. After that enter the ant file name on the option Build file. <img src="/images/2016/12/jenkins-set-ant-build-file.png" alt=""> This is the ant file I am using for the backup</p>
-<pre tabindex="0"><code>&lt;project name=&quot;backup&quot; default=&quot;main&quot; basedir=&quot;.&quot;&gt;
+<pre tabindex="0"><code>&lt;project name=&#34;backup&#34; default=&#34;main&#34; basedir=&#34;.&#34;&gt;
    &lt;description&gt;full backup&lt;/description&gt;
 
-   &lt;target name=&quot;main&quot;&gt;
-      &lt;copy todir=&quot;g:\\backup2016\\Documents&quot; 
-         verbose=&quot;yes&quot; failonerror=&quot;false&quot; 
-         preservelastmodified=&quot;yes&quot; force=&quot;yes&quot;&gt;
+   &lt;target name=&#34;main&#34;&gt;
+      &lt;copy todir=&#34;g:\\backup2016\\Documents&#34; 
+         verbose=&#34;yes&#34; failonerror=&#34;false&#34; 
+         preservelastmodified=&#34;yes&#34; force=&#34;yes&#34;&gt;
 
-         &lt;fileset dir=&quot;C:\\Users\\hamilton\\Documents&quot;/&gt;
+         &lt;fileset dir=&#34;C:\\Users\\hamilton\\Documents&#34;/&gt;
       &lt;/copy&gt;
    &lt;/target&gt;
 
@@ -353,20 +566,20 @@ Preparing the vault, a.k.a. Amazon S3 I decided to store my backups on Amazon S3
 </ul>
 <p>Most of the steps are just click click and click. Give the proper rights to your new user require more setup. The idea is to <a href="https://console.aws.amazon.com/iam/home?region=us-east-1#policies">create a policy</a> and attach an user to it, and the policy has a well defined JSON format, yes a JSON format, <a href="http://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements.html">with lots and lots of options</a>. You can do cool stuff like filter by IP, give rights during some period of time and several other cool features. I used the most simple rights: right to read the bucket and the right to create objects in the bucket, this is the policy description I used:</p>
 <pre tabindex="0"><code>{
-    &quot;Version&quot;: &quot;2012-10-17&quot;,
-    &quot;Statement&quot;: \[
+    &#34;Version&#34;: &#34;2012-10-17&#34;,
+    &#34;Statement&#34;: \[
         {
-            &quot;Action&quot;: \[
-                &quot;s3:ListBucket&quot;,
-                &quot;s3:GetBucketLocation&quot;
+            &#34;Action&#34;: \[
+                &#34;s3:ListBucket&#34;,
+                &#34;s3:GetBucketLocation&#34;
             \],
-            &quot;Effect&quot;: &quot;Allow&quot;,
-            &quot;Resource&quot;: &quot;arn:aws:s3:::bucketname&quot;
+            &#34;Effect&#34;: &#34;Allow&#34;,
+            &#34;Resource&#34;: &#34;arn:aws:s3:::bucketname&#34;
         },
         {
-            &quot;Action&quot;: &quot;s3:\*&quot;,
-            &quot;Effect&quot;: &quot;Allow&quot;,
-            &quot;Resource&quot;: &quot;arn:aws:s3:::bucketname/\*&quot;
+            &#34;Action&#34;: &#34;s3:\*&#34;,
+            &#34;Effect&#34;: &#34;Allow&#34;,
+            &#34;Resource&#34;: &#34;arn:aws:s3:::bucketname/\*&#34;
         }
     \]
 }
@@ -394,8 +607,8 @@ cat ~/.aws/credentials
 <p>So the following script is doing all of it:</p>
 <pre tabindex="0"><code>#!/bin/sh
 # get the current timestamp
-NOW=&quot;$(date +&quot;%Y%m%d\_%H%M%S\_%N&quot;)&quot;
-TODAY=&quot;$(date +&quot;%Y%m%d&quot;)&quot;
+NOW=&#34;$(date +&#34;%Y%m%d\_%H%M%S\_%N&#34;)&#34;
+TODAY=&#34;$(date +&#34;%Y%m%d&#34;)&#34;
 
 # create the backup folder
 mkdir /tmp/bkp\_$NOW
@@ -418,16 +631,16 @@ for dir in $(ls); do tar cvzf /tmp/$TODAY/${dir}\_$NOW.tar.gz ${dir}; done
 aws s3 cp /tmp/$TODAY s3://bucketname/$TODAY --recursive
 
 # remove the temporary folders
-echo &quot;removing /tmp/bkp\_$NOW and /tmp/$TODAY&quot;
+echo &#34;removing /tmp/bkp\_$NOW and /tmp/$TODAY&#34;
 rm -rf /tmp/bkp\_$NOW
 rm -rf /tmp/$TODAY
 </code></pre><p>Now let&rsquo;s comment some important parts of this script:</p>
-<pre tabindex="0"><code>TODAY=&quot;$(date +&quot;%Y%m%d&quot;)&quot;
+<pre tabindex="0"><code>TODAY=&#34;$(date +&#34;%Y%m%d&#34;)&#34;
 </code></pre><p>It creates an environment variable with the result of the execution of the command date with the Ymd format, the equivalent is done on NOW.</p>
 <pre tabindex="0"><code>mysqldump --complete-insert --no-set-names --host=127.0.0.1 --user=backup\_uzr --password=XXXX wordpress &gt; /tmp/bkp\_$NOW/wordpress.sql
 </code></pre><p>Note that we are using the password in the command line, so there one security issue here, in order to minimize this I created an read only user at the mysql database, with the following commands, that should be executed at msyql console</p>
-<pre tabindex="0"><code>GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@127.0.0.1 IDENTIFIED BY 'XXXX'; 
-GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@localhost IDENTIFIED BY 'XXXX'; 
+<pre tabindex="0"><code>GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@127.0.0.1 IDENTIFIED BY &#39;XXXX&#39;; 
+GRANT SELECT, LOCK TABLES ON \*.\* TO backup\_uzr@localhost IDENTIFIED BY &#39;XXXX&#39;; 
 flush privileges;
 </code></pre><p>After all the files are copied in different folders at /tmp/bkp_$NOW we run this magic command</p>
 <pre tabindex="0"><code>for dir in $(ls); do tar cvzf /tmp/$TODAY/${dir}\_$NOW.tar.gz ${dir}; done
@@ -458,14 +671,14 @@ POC - the start For every project, I allways plan for proof of concepts, small i
 <p><img src="/images/2016/10/2016-10-26_2011.png" alt="2016-10-26_2011"> The timeline control was a tricky part of the implementation, first I created a div for the white background, then small blue divs over it at the proportional position to show the question timeline. Everything was going until the moment that I felt like I need to drag those divs to change the question second. After trying a lot to use <a href="http://api.jqueryui.com/draggable/#option-containment">dragable()</a> I wasn´t able to make it work inside the div with &ldquo;position: absolute&rdquo;. So I changed plans and created a <a href="http://www.createjs.com/easeljs">EaseJS</a> <a href="http://www.createjs.com/docs/easeljs/classes/Stage.html">stage</a> to draw the timeline and allow the user to drag it and change the question second by dragging it. I know that I should have a little message pushing the user to drag it, or at least change the cursor to indicate that the timeline bars are dragable, but this I realize after everything is finished :) To see the timeline implementation, look for it at <a href="https://github.com/hamilton-lima/vanhackaton-video-editor/blob/master/server/client/app/app.js">app.js</a> at the directive &ldquo;draggableTimeline&rdquo;, that of course should be in a separated file.</p>
 <h2 id="the-database-choice">The database choice</h2>
 <p>My first option was to save all the data in flat files, using folders to separate the stories for each user, and to keep one master pointing for the files in the folders, but I drop this idea really quick, when I start to remember how flat files handling can be a pain, specially about zombie processes locking files. So instead of going in the direction of setting an <a href="http://nosql-database.org/">NoSQL DB</a>, or an relational like <a href="https://www.mysql.com/">Mysql</a> or <a href="https://www.postgresql.org/">Postgres</a>, I decided to keep it as simple as possible by going with <a href="https://sqlite.org/">SQLLite</a>. That decision saved me some hours of handling issues like: server setup, user creation, access rights. Everything was plain simple. It was just a matter of write a code to create the table, and some code to save data, yes plain INSERTs, and read data when need, using plain SQL. One main improvement that I can see from the implementation is to separate the database access details in a separated component, So it would be easier to plug other database imeplemention without changing everything. One detail that I believe it worth highlight is that the query function are asynchronous, I gave a try on some implementations using <a href="https://github.com/kriasoft/node-sqlite">Promisses over SQLLite</a>, but I didn&rsquo;t like the syntax at all, It looks confusing to me the end result, this could be result of my stress during the weekend, or quick judgement to avoid potential risks. End of the day <a href="https://github.com/hamilton-lima/vanhackaton-video-editor/blob/master/server/index.js">implemented a simple solution to handle it.</a></p>
-<pre tabindex="0"><code>app.get('/api/story/:id', function (req, res) {
-	var msg = 'get story from id: ' + req.params.id;
+<pre tabindex="0"><code>app.get(&#39;/api/story/:id&#39;, function (req, res) {
+	var msg = &#39;get story from id: &#39; + req.params.id;
 	console.log(msg);
 
-	var result = db.all('SELECT \* FROM story WHERE id = ? ', req.params.id, 
+	var result = db.all(&#39;SELECT \* FROM story WHERE id = ? &#39;, req.params.id, 
 	**function(err,rows){**
 		if(err){
-			console.log('error: ', err );
+			console.log(&#39;error: &#39;, err );
   			**res.status(500).send({ error: err });**
   			return;
   		}
@@ -556,12 +769,12 @@ Those beatiful words means: We sould tell the server to allow other servers to c
 <pre tabindex="0"><code>play.filters {
  cors {
  # allow all paths
- pathPrefixes = \[&quot;/&quot;\]
+ pathPrefixes = \[&#34;/&#34;\]
  
  # allow all origins (You can specify if you want)
  **allowedOrigins = null**
  
- allowedHttpMethods = \[&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;\]
+ allowedHttpMethods = \[&#34;GET&#34;, &#34;POST&#34;, &#34;PUT&#34;, &#34;DELETE&#34;\]
  
  # allow all headers
  allowedHttpHeaders = null
@@ -614,7 +827,7 @@ Quick tips to a playframework application Of course there are tons of nice feat
 <li>Create your model classes, as <a href="https://pt.wikipedia.org/wiki/Plain_Old_Java_Objects">POJO</a> files, make life simple all the attributes can be public, you just need to add the @Entity notation, extend Model class and add @Id notation as well, that will generate the necessary table in the database to store your objects</li>
 <li>Use <a href="https://ebean-orm.github.io/">Ebean</a> to read data from the database, most of the time is very simple and straightforward, for example an simple find by barcode on the Products is written like this:</li>
 </ul>
-<pre tabindex="0"><code>     new Model.Finder(Product.class).where().eq(&quot;barcode&quot;, barcode).findUnique();
+<pre tabindex="0"><code>     new Model.Finder(Product.class).where().eq(&#34;barcode&#34;, barcode).findUnique();
 </code></pre><h3 id="declaring-relationship-between-classes">Declaring relationship between classes</h3>
 <p>This is the tables in use for this application <img src="/images/2016/10/beepify-database.png" alt="beepify-database"> Note that we have some relationships: from Product to Prices, from Prices to Product and from Prices to Store, let´s see how this represented in the Java code. For reference here are the complete java classes :</p>
 <ul>
@@ -623,7 +836,7 @@ Quick tips to a playframework application Of course there are tons of nice feat
 <li><a href="/images/2016/10/Store.java_.txt">Store.java</a></li>
 </ul>
 <p>At the Product class the relationship with the list of Price is represented by the annotation @OneToMany that indicates the attribute &ldquo;product&rdquo; as the way to map Price to one Product</p>
-<pre tabindex="0"><code>   @OneToMany(mappedBy=&quot;product&quot;)
+<pre tabindex="0"><code>   @OneToMany(mappedBy=&#34;product&#34;)
      public List&lt;Price&gt; prices;
 </code></pre><p>At the Price class we have counterpart of the relationship represented with the annotation
 @ManyToOne</p>
@@ -687,26 +900,26 @@ addSbtPlugin(&ldquo;com.typesafe.sbteclipse&rdquo; % &ldquo;sbteclipse-plugin&rd
 <p>After this finished go to eclipse and import the project to the Eclipse workspace</p>
 <h3 id="prepare-the-database">Prepare the database</h3>
 <p>Play apps can run with in memory databases, but I want to start with a more real example using mysql as database, the first thing to do is to create the database and the user that your application will use to store the data, I put together this script that I save in the docs folder of the project.</p>
-<pre tabindex="0"><code>CREATE USER 'beepify\_user\_db'@'%' IDENTIFIED BY 'fFRbUPmS9BSHggR';
-CREATE USER 'beepify\_user\_db'@'localhost' IDENTIFIED BY 'fFRbUPmS9BSHggR';
+<pre tabindex="0"><code>CREATE USER &#39;beepify\_user\_db&#39;@&#39;%&#39; IDENTIFIED BY &#39;fFRbUPmS9BSHggR&#39;;
+CREATE USER &#39;beepify\_user\_db&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;fFRbUPmS9BSHggR&#39;;
 
 CREATE SCHEMA db\_beepify DEFAULT CHARACTER SET utf8;
-GRANT ALL PRIVILEGES ON db\_beepify.\* TO 'beepify\_user\_db'@'%' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON db\_beepify.\* TO 'beepify\_user\_db'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON db\_beepify.\* TO &#39;beepify\_user\_db&#39;@&#39;%&#39; WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON db\_beepify.\* TO &#39;beepify\_user\_db&#39;@&#39;localhost&#39; WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 </code></pre><p>You can generate nice and <a href="https://www.random.org/passwords/?num=5&amp;len=15&amp;format=html&amp;rnd=new">random passwords here</a>, and the above username, database names and passwords are not the ones I used :)</p>
 <p>Change play configuration to use the new database</p>
 <p><strong>change to match the following at conf/application.conf</strong></p>
 <pre tabindex="0"><code>play.db {
-  config = &quot;db&quot;
-  default = &quot;default&quot;
+  config = &#34;db&#34;
+  default = &#34;default&#34;
 ... 
 
 db {
     default.driver=com.mysql.jdbc.Driver
-    default.url=&quot;jdbc:mysql://127.0.0.1:3306/db\_beepify?characterEncoding=UTF-8&quot;
+    default.url=&#34;jdbc:mysql://127.0.0.1:3306/db\_beepify?characterEncoding=UTF-8&#34;
     default.username=beepify\_user\_db
-    default.password=&quot;fFRbUPmS9BSHggR&quot;
+    default.password=&#34;fFRbUPmS9BSHggR&#34;
 
 ...
 </code></pre><p>ebean.default=&ldquo;models.*&rdquo;</p>
@@ -714,7 +927,7 @@ db {
 <p>Important comment on this configuration: ebean.default=&ldquo;models.*&rdquo; will indicate to Ebean framework, that is the ORM framework installed by default with Playframework, that the package models is used to store all of your models</p>
 </blockquote>
 <p><strong>add to build.sbt</strong></p>
-<pre tabindex="0"><code>libraryDependencies += &quot;mysql&quot; % &quot;mysql-connector-java&quot; % &quot;5.1.36&quot;
+<pre tabindex="0"><code>libraryDependencies += &#34;mysql&#34; % &#34;mysql-connector-java&#34; % &#34;5.1.36&#34;
 libraryDependencies += evolutions
 
 enablePlugins(PlayEbean)
@@ -793,7 +1006,7 @@ The start As I am planning to participate on the next Vanhackton, I invited othe
 <li>search in stores nearby</li>
 </ul>
 <p>After doing a quick public opinion poll at the vanhackton slack channel that has around 600 users, we got the feedback we need: compare prices and search in stores nearby were the public choice. Here are the poll results <img src="/images/2016/10/beepify-poll.png" alt="beepify-poll"> We use the following command to create the poll:</p>
-<pre tabindex="0"><code>/poll &quot;We the beepify team are warming up for the hackton, so we decided to create an application that will give information about products. What feature you choose to be the first one ?&quot; &quot;Compare prices&quot; &quot;Add user reviews&quot; &quot;Create product lists&quot; &quot;Chat with customer service&quot; &quot;Search in stores nearby&quot;
+<pre tabindex="0"><code>/poll &#34;We the beepify team are warming up for the hackton, so we decided to create an application that will give information about products. What feature you choose to be the first one ?&#34; &#34;Compare prices&#34; &#34;Add user reviews&#34; &#34;Create product lists&#34; &#34;Chat with customer service&#34; &#34;Search in stores nearby&#34;
 </code></pre><p>With that results we decided to merge the compare prices with the search in stores nearby in one feature.</p>
 <h3 id="the-application-flow">The application flow</h3>
 <p>These are the steps that the application should follow: 1 - When the application opens it should be ready to scan the bar code 2 - As soon it detects a bar code, it should beep, blink the screen and redirect to the results screen 3 - The results screen shows a map with products and prices, pointing at the map the stores. The following are some suggestion of UI implementation:</p>
