@@ -1,0 +1,19 @@
+{
+  "links": [
+    {
+      "name": "twitter",
+      "url": "https://twitter.com/athanazio",
+      "image": "images/icons/twitter.svg"
+    },
+    {
+      "name": "github",
+      "url": "https://github.com/hamilton-lima",
+      "image": "images/icons/github.svg"
+    },
+    {
+      "name": "linkedin",
+      "url": "https://www.linkedin.com/in/hamiltonlima",
+      "image": "images/icons/linkedin.svg"
+    }
+  ]
+}
