@@ -2,9 +2,10 @@ baseURL = "https://hamiltonlima.com"
 languageCode = "en-us"
 defaultContentLanguage = "en"
 title = "Hamilton Lima"
-theme = "hermit"
-# enableGitInfo = true
+theme = "hugo-winston-theme"
+paginate = 10
 pygmentsCodefences  = true
+pygmentsCodefencesGuessSyntax = true
 pygmentsUseClasses  = true
 # hasCJKLanguage = true  # If Chinese/Japanese/Korean is your main content language, enable this to make wordCount works right.
 rssLimit = 10  # Maximum number of items in the RSS feed.
@@ -50,6 +51,30 @@ enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/func
 
   code_copy_button = true # Turn on/off the code-copy-button for code-fields
   
+# hugo-winston-theme
+  google_analytics_id = ""
+  twitter_handle = "@zerostaticio"
+  showAuthorOnHomepage = true
+  showAuthorOnPosts = false
+  showIntroContentOnHomepage = true
+  showPostsOnHomepage = false
+  usePaginationOnHomepage = false
+  limitPostsOnHomepage = 3 # only used if usePaginationOnHomepage is false
+  sortPostsByDateOldestFirst = false
+  addDot = true
+  addFrame = true
+  highlightColor = '#1b4c7a'
+  baseColor = "#ffffff"
+  baseOffsetColor = "#eaeaea"
+  headingColor = "#1c1b1d"
+  textColor = "#4e5157"
+  dotColor = "#f06937"
+  enableGoogleFonts = true 
+  googleFontsUrl = "https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap"
+  fontFamilyHeading = "Poppins"
+  fontFamilyParagraph = "Helvetica"
+  fontFamilyMonospace = "monospace"
+
   # Add custom css
   # customCSS = ["css/foo.css", "css/bar.css"]
 
@@ -63,11 +88,18 @@ enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/func
     name = "github"
     url = "https://github.com/hamilton-lima"
 
+# markdown config settings https://gohugo.io/getting-started/configuration-markup/#goldmark
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      hardWraps = false
+      unsafe = true
+      xhtml = false
 [menu]
 
   [[menu.main]]
     name = "Posts"
-    url = "posts"
+    url = "/posts"
     weight = 10
 
   # [[menu.main]]
