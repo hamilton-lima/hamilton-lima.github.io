@@ -53,11 +53,11 @@ enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/func
   
 # hugo-winston-theme
   google_analytics_id = ""
-  twitter_handle = "@zerostaticio"
+  twitter_handle = "@athanazio"
   showAuthorOnHomepage = true
   showAuthorOnPosts = false
   showIntroContentOnHomepage = true
-  showPostsOnHomepage = false
+  showPostsOnHomepage = true
   usePaginationOnHomepage = false
   limitPostsOnHomepage = 3 # only used if usePaginationOnHomepage is false
   sortPostsByDateOldestFirst = false
