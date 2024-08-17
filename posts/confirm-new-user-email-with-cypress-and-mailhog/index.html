@@ -1,173 +1,172 @@
-<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Confirm new user email with Cypress and MailHog - Hamilton Lima</title>
-<meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=https://hamiltonlima.com/favicon.png><link rel=canonical href=https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/><link rel=stylesheet href=/css/style.min.341d362bef2b6b1437e0cefb99a0cb7e4141b6954f8398c1b10275f699edc362.css><link rel=stylesheet href=/assets/css/extended.min.9729f28a5087b689b946e103d96abd63bfd37b1417effa251dbf798312e3fba5.css><meta property="og:title" content="Confirm new user email with Cypress and MailHog"><meta property="og:type" content="website"><meta property="og:url" content="https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/"><meta name=twitter:card content="summary"><meta name=twitter:site content="@athanazio"><meta name=twitter:creator content="@athanazio"><link rel=preconnect href=https://fonts.gstatic.com><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap" rel=stylesheet></head><body class='page frame page-blog-single'><div id=menu-main-mobile class=menu-main-mobile><ul class=menu><li class=menu-item-posts><a href=https://hamiltonlima.com/posts>Posts</a></li></ul></div><div id=wrapper class=wrapper><div class=header><a class=header-logo href=/>Hamilton Lima</a><div class=menu-main><ul><li class=menu-item-posts><a href=/posts><span>Posts</span></a></li></ul></div><div id=toggle-menu-main-mobile class=hamburger-trigger><button class=hamburger>Menu</button></div></div><div class=blog><div class=intro><h1>Confirm new user email with Cypress and MailHog<span class=dot>.</span></h1></div><div class=content><p>I really like <a href=https://cypress.io>Cypress</a>, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?</p><p><img src=/images/2022/user-creation-automation-steps-cypress.jpg alt="Gru showing steps of user creation with cypress"></p><h2 id=so-many-options>So many options</h2><p>There are some posssibilities</p><ul><li>Pay some email API services, oh GMAIL why you don&rsquo;t have it?</li><li>Navigate to mailinator webpage, parse the HTML and find the email, I need internet for this.</li><li>Pay mailinator API, did that in the past, works just fine, but you know&mldr; money.</li></ul><p>Then some revelation come, not really just research on options, why not use a local email server then build an API to get the email contents? The first one that came to mind is <a href=https://james.apache.org/>James</a> very stable email server, save data in the database, so it would be super easy to extract the messages, but why not an existing solution that is email server AND already have the API?</p><p>Then I found <a href=https://github.com/mailhog/MailHog>MAILHOG</a>! Email server with API to fetch the data, oh this is good, very good :)</p><h2 id=how-it-works>How it works?</h2><p>So let&rsquo;s see the entire process, with some quick notes</p><ul><li>Start email server, docker-compose is your friend, this is the image: <code>mailhog/mailhog:v1.0.1</code> and these are the ports: 1025 and 8025</li><li>we delete all messages from the local email server, call DELETE using <code>/api/v1/messages</code></li><li>visit the user creation page, <code>cy.visit()</code></li><li>enter the data for the new user, generate some fake date with <code>@faker-js/faker</code> then use multiple <code>cy.get().type()</code></li><li>submit the form, <code>cy.get().click()</code></li><li>confirm that the API finished with success, <code>cy.intercept()</code> and <code>cy.wait()</code></li><li>the API will send and email to our mailhog local server, included a environment variable use <a href=https://nodemailer.com>nodemailer</a> to send the messages to the test server instead of <a href=https://www.mailgun.com>mailgun</a></li><li>get email received to the created user, call GET <code>/api/v1/messages</code> then <code>/api/v1/messages/{id}</code></li><li>find the confirmation link in the email, decode from <code>quotedPrintable</code> then parse the HTML using <a href=https://cheerio.js.org>cherio</a></li><li>visit the link, <code>cy.visit()</code></li><li>login with the new account</li></ul><h2 id=show-me-the-code>Show me the code</h2><p>Docker compose for the the email</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  email:
-</span></span><span class=line><span class=cl>    container_name: email
-</span></span><span class=line><span class=cl>    image: mailhog/mailhog:v1.0.1    
-</span></span><span class=line><span class=cl>    ports:
-</span></span><span class=line><span class=cl>      - 1025:1025
-</span></span><span class=line><span class=cl>      - 8025:8025
-</span></span><span class=line><span class=cl>    logging:
-</span></span><span class=line><span class=cl>      driver: &#34;json-file&#34;
-</span></span><span class=line><span class=cl>      options:
-</span></span><span class=line><span class=cl>        max-size: &#34;200k&#34;
-</span></span><span class=line><span class=cl>        max-file: &#34;10&#34;
-</span></span></code></pre></div><p>Delete all the emails</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=n>cy</span><span class=o>.</span><span class=n>task</span><span class=p>(</span><span class=s1>&#39;deleteAllEmails&#39;</span><span class=p>,</span> <span class=n>email</span><span class=p>)</span><span class=o>.</span><span class=n>then</span><span class=p>(</span><span class=n>response</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=n>cy</span><span class=o>.</span><span class=n>log</span><span class=p>(</span><span class=err>`</span><span class=n>All</span> <span class=n>emails</span> <span class=n>deleted</span> <span class=n>from</span> <span class=n>the</span> <span class=n>mail</span> <span class=n>box</span> <span class=o>$</span><span class=p>{</span><span class=n>response</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl><span class=p>})</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>code</span> <span class=ow>in</span> <span class=n>the</span> <span class=n>plugin</span>
-</span></span><span class=line><span class=cl><span class=o>...</span>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>deleteAllEmails</span> <span class=o>=</span> <span class=n>async</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>delete</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>data</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><p>Visiting the signup page</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  beforeEach(() =&gt; {
-</span></span><span class=line><span class=cl>    cy.visit(`${host}/signup/newuser`);
-</span></span><span class=line><span class=cl>  })
-</span></span></code></pre></div><p>Generating fake data and entering in the fields, remember to add the <code>id</code> to the input fields, there is always to option to use the <a href=https://docs.cypress.io/guides/references/best-practices#Selecting-Elements>recommended cypress strategy</a>, <code>cy.get('[data-cy=submit]').click()</code> but I prefer the syntax using the id <code>cy.get('#submit]').click()</code> as most of the time with the new frameworks we pretty much don&rsquo;t change component id, then this field is less volatile, and the syntax seems more readable.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>  let email;
-</span></span><span class=line><span class=cl>  let password;
-</span></span><span class=line><span class=cl>  let firstName;
-</span></span><span class=line><span class=cl>  let lastName;
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>  before(() =&gt; {
-</span></span><span class=line><span class=cl>    password = faker.internet.password();
-</span></span><span class=line><span class=cl>    firstName = faker.name.findName();
-</span></span><span class=line><span class=cl>    lastName = faker.name.findName();
-</span></span><span class=line><span class=cl>    email = faker.internet.email(firstName, lastName, &#39;host.docker.internal&#39;);
-</span></span><span class=line><span class=cl>  })
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>... 
-</span></span><span class=line><span class=cl>    cy.get(&#39;#firstName&#39;).type(firstName);
-</span></span><span class=line><span class=cl>    cy.get(&#39;#lastName&#39;).type(lastName);
-</span></span><span class=line><span class=cl>    cy.get(&#39;#email&#39;).type(email);
-</span></span><span class=line><span class=cl>    cy.get(&#39;#password&#39;).type(password);
-</span></span></code></pre></div><p>Submit the form and check if the API finished without problems</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>    cy.intercept(&#39;POST&#39;, &#39;**/user/create*&#39;).as(&#39;CREATE&#39;)
-</span></span><span class=line><span class=cl>    cy.get(&#39;#submit&#39;).click();
-</span></span><span class=line><span class=cl>    cy.wait(&#39;@CREATE&#39;).its(&#39;response.statusCode&#39;).should(&#39;be.oneOf&#39;, [201])
-</span></span></code></pre></div><p>Nodemailer sending email to local server WITHOUT authentication, note that it uses the same data structure as mailgun</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl>  <span class=n>async</span> <span class=n>sendEmail</span><span class=p>(</span><span class=n>data</span><span class=p>:</span> <span class=n>MailgunData</span><span class=p>):</span> <span class=n>Promise</span><span class=o>&lt;</span><span class=n>string</span><span class=o>&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=n>try</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=n>this</span><span class=o>.</span><span class=n>logger</span><span class=o>.</span><span class=n>log</span><span class=p>(</span><span class=err>`</span><span class=n>Send</span> <span class=n>email</span> <span class=n>local</span> <span class=o>$</span><span class=p>{</span><span class=n>data</span><span class=o>.</span><span class=n>subject</span><span class=p>}</span> <span class=n>TO</span><span class=p>:</span> <span class=o>$</span><span class=p>{</span><span class=n>data</span><span class=o>.</span><span class=n>to</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>      <span class=k>const</span> <span class=n>transporter</span> <span class=o>=</span> <span class=n>nodemailer</span><span class=o>.</span><span class=n>createTransport</span><span class=p>({</span>
-</span></span><span class=line><span class=cl>        <span class=n>port</span><span class=p>:</span> <span class=mi>1025</span><span class=p>,</span>
-</span></span><span class=line><span class=cl>        <span class=n>host</span><span class=p>:</span> <span class=s1>&#39;host.docker.internal&#39;</span><span class=p>,</span>
-</span></span><span class=line><span class=cl>        <span class=n>secure</span><span class=p>:</span> <span class=bp>false</span><span class=p>,</span>
-</span></span><span class=line><span class=cl>      <span class=p>});</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>      <span class=k>const</span> <span class=n>result</span> <span class=o>=</span> <span class=n>await</span> <span class=n>transporter</span><span class=o>.</span><span class=n>sendMail</span><span class=p>(</span><span class=n>data</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>      <span class=n>this</span><span class=o>.</span><span class=n>logger</span><span class=o>.</span><span class=n>log</span><span class=p>(</span><span class=err>`</span><span class=n>Email</span> <span class=n>sent</span> <span class=o>$</span><span class=p>{</span><span class=n>JSON</span><span class=o>.</span><span class=n>stringify</span><span class=p>(</span><span class=n>result</span><span class=p>)}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl> 
-</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span> <span class=n>catch</span> <span class=p>(</span><span class=n>error</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=n>this</span><span class=o>.</span><span class=n>logger</span><span class=o>.</span><span class=n>error</span><span class=p>(</span><span class=s1>&#39;Error when sending the notification&#39;</span><span class=p>,</span> <span class=n>error</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=cl><span class=o>...</span>
-</span></span><span class=line><span class=cl><span class=k>export</span> <span class=k>class</span> <span class=n>MailgunData</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=n>subject</span><span class=p>:</span> <span class=n>string</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=n>from</span><span class=p>:</span> <span class=n>string</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=n>to</span><span class=p>:</span> <span class=n>string</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=n>text</span><span class=p>:</span> <span class=n>string</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=n>html</span><span class=p>:</span> <span class=n>string</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>  
-</span></span></code></pre></div><p>Getting the email messages</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl>  <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=o>...</span>
-</span></span><span class=line><span class=cl>  <span class=o>//</span> <span class=k>do</span> <span class=n>some</span> <span class=n>data</span> <span class=n>massage</span> <span class=n>to</span> <span class=n>get</span> <span class=n>the</span> <span class=n>email</span> <span class=n>ID</span><span class=p>,</span> <span class=n>see</span> <span class=n>the</span> <span class=n>plugin</span> <span class=n>full</span> <span class=n>code</span> <span class=n>at</span> <span class=n>the</span> <span class=n>end</span> <span class=n>of</span> <span class=n>this</span><span class=o>.</span>
-</span></span><span class=line><span class=cl>  <span class=o>...</span> 
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=o>/$</span><span class=p>{</span><span class=n>id</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=n>result</span> <span class=o>=</span> <span class=n>data</span><span class=p>;</span>
-</span></span></code></pre></div><p>DECODE the <a href=https://www.npmjs.com/package/quoted-printable>quotedPrintable</a> then parse the HTML using <a href=https://cheerio.js.org>cherio</a>, OMG this one took some time, read some more here <a href=https://en.wikipedia.org/wiki/Quoted-printable>Quoted Printable</a>, in summary if you see <code>=3D</code> all over the HTML message there is a good chance you need to decode it :)</p><p>After the decoding there was the challenge of parsing the message HTML, cypress offers this but not in the plugin code, so then I used <a href=https://cheerio.js.org>cherio</a>, my new friend, to parse the HTML, this is such a nicely done piece of technology, simple and very resourcefull. it works just as expected, feed in the HTML, get a parsed object, do queries to find elements, receive a LIST get the one you want and boom retrieve some attributes.</p><p>See the code, it speaks for it self</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>const</span> <span class=n>getLinkFromEmail</span> <span class=o>=</span> <span class=p>(</span><span class=n>email</span><span class=p>,</span> <span class=n>tag</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=n>console</span><span class=o>.</span><span class=n>log</span><span class=p>(</span><span class=err>`</span><span class=n>getLinkFromEmail</span> <span class=o>$</span><span class=p>{</span><span class=n>email</span><span class=p>}</span> <span class=o>$</span><span class=p>{</span><span class=n>tag</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>body</span> <span class=o>=</span> <span class=n>utf8</span><span class=o>.</span><span class=n>decode</span><span class=p>(</span><span class=n>quotedPrintable</span><span class=o>.</span><span class=n>decode</span><span class=p>(</span><span class=n>email</span><span class=o>.</span><span class=n>Content</span><span class=o>.</span><span class=n>Body</span><span class=p>));</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>html</span> <span class=o>=</span> <span class=n>cheerio</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>body</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>links</span> <span class=o>=</span> <span class=n>html</span><span class=p>(</span><span class=n>tag</span><span class=p>)</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;a&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>link</span> <span class=o>=</span> <span class=n>links</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>result</span> <span class=o>=</span> <span class=n>link</span><span class=o>.</span><span class=n>attribs</span><span class=o>.</span><span class=n>href</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span></code></pre></div><p>BONUS - create a plugin for cypress</p><p>Add this to your <code>plugins/index.js</code></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=o>///</span> <span class=o>&lt;</span><span class=n>reference</span> <span class=n>types</span><span class=o>=</span><span class=s2>&#34;cypress&#34;</span> <span class=o>/&gt;</span>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>mailHogAPI</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;./mail-hog.api&#39;</span><span class=p>)</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=o>/**</span>
-</span></span><span class=line><span class=cl> <span class=o>*</span> <span class=err>@</span><span class=n>type</span> <span class=p>{</span><span class=n>Cypress</span><span class=o>.</span><span class=n>PluginConfig</span><span class=p>}</span>
-</span></span><span class=line><span class=cl> <span class=o>*/</span>
-</span></span><span class=line><span class=cl><span class=n>module</span><span class=o>.</span><span class=n>exports</span> <span class=o>=</span> <span class=p>(</span><span class=n>on</span><span class=p>,</span> <span class=n>config</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=n>on</span><span class=p>(</span><span class=s2>&#34;task&#34;</span><span class=p>,</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=n>async</span> <span class=s2>&#34;getEmail&#34;</span><span class=p>(</span><span class=n>to</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=n>await</span> <span class=n>mailHogAPI</span><span class=o>.</span><span class=n>getEmail</span><span class=p>(</span><span class=n>to</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>    <span class=p>},</span>
-</span></span><span class=line><span class=cl>    <span class=n>async</span> <span class=s2>&#34;deleteAllEmails&#34;</span><span class=p>()</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=n>await</span> <span class=n>mailHogAPI</span><span class=o>.</span><span class=n>deleteAllEmails</span><span class=p>();</span>
-</span></span><span class=line><span class=cl>    <span class=p>},</span>
-</span></span><span class=line><span class=cl>    <span class=n>async</span> <span class=s2>&#34;getLinkFromEmail&#34;</span><span class=p>({</span> <span class=n>email</span><span class=p>,</span> <span class=n>tag</span> <span class=p>})</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=k>return</span> <span class=n>mailHogAPI</span><span class=o>.</span><span class=n>getLinkFromEmail</span><span class=p>(</span><span class=n>email</span><span class=p>,</span> <span class=n>tag</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>  <span class=p>})</span>
-</span></span><span class=line><span class=cl><span class=p>};</span>
-</span></span></code></pre></div><p>And the plugin file itself <code>plugins/mail-hog.api.js</code></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-gdscript3 data-lang=gdscript3><span class=line><span class=cl><span class=k>const</span> <span class=n>axios</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s2>&#34;axios&#34;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>cheerio</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;cheerio&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl><span class=k>var</span> <span class=n>quotedPrintable</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;quoted-printable&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl><span class=k>var</span> <span class=n>utf8</span> <span class=o>=</span> <span class=n>require</span><span class=p>(</span><span class=s1>&#39;utf8&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>MAILHOG_HOST</span> <span class=o>=</span> <span class=n>process</span><span class=o>.</span><span class=n>env</span><span class=o>.</span><span class=n>MAILHOG_HOST</span> <span class=o>||</span> <span class=s1>&#39;http://host.docker.internal:8025&#39;</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>See</span> <span class=n>API</span> <span class=n>documentation</span> <span class=n>here</span> <span class=n>https</span><span class=p>:</span><span class=o>//</span><span class=n>github</span><span class=o>.</span><span class=n>com</span><span class=o>/</span><span class=n>mailhog</span><span class=o>/</span><span class=n>MailHog</span><span class=o>/</span><span class=n>blob</span><span class=o>/</span><span class=n>master</span><span class=o>/</span><span class=n>docs</span><span class=o>/</span><span class=n>APIv1</span><span class=o>.</span><span class=n>md</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>getEmail</span> <span class=o>=</span> <span class=n>async</span> <span class=p>(</span><span class=n>to</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=n>to</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=k>return</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=n>to</span> <span class=o>=</span> <span class=n>to</span><span class=o>.</span><span class=n>toLowerCase</span><span class=p>();</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>  <span class=n>let</span> <span class=n>id</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=n>let</span> <span class=n>result</span> <span class=o>=</span> <span class=n>null</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>  <span class=o>//</span> <span class=n>search</span> <span class=n>path</span> <span class=p>[]{</span><span class=n>ID</span><span class=p>,</span><span class=n>Raw</span><span class=p>:[{</span><span class=n>To</span><span class=p>:[</span><span class=n>string</span><span class=p>]}]}</span>
-</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>data</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=p>(</span><span class=n>let</span> <span class=n>message</span> <span class=n>of</span> <span class=n>data</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=n>message</span><span class=o>.</span><span class=n>Raw</span> <span class=o>&amp;&amp;</span> <span class=n>message</span><span class=o>.</span><span class=n>Raw</span><span class=o>.</span><span class=n>To</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=n>message</span><span class=o>.</span><span class=n>Raw</span><span class=o>.</span><span class=n>To</span><span class=o>.</span><span class=n>includes</span><span class=p>(</span><span class=n>to</span><span class=p>))</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>          <span class=n>id</span> <span class=o>=</span> <span class=n>message</span><span class=o>.</span><span class=n>ID</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>          <span class=k>break</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>        <span class=p>}</span>
-</span></span><span class=line><span class=cl>      <span class=p>}</span>
-</span></span><span class=line><span class=cl>    <span class=p>}</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>  <span class=k>if</span> <span class=p>(</span><span class=n>id</span><span class=p>)</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>    <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=o>/$</span><span class=p>{</span><span class=n>id</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>    <span class=n>result</span> <span class=o>=</span> <span class=n>data</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=p>}</span>
-</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>};</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=o>//</span> <span class=n>tagSelector</span><span class=p>,</span> <span class=n>see</span> <span class=n>https</span><span class=p>:</span><span class=o>//</span><span class=n>cheerio</span><span class=o>.</span><span class=n>js</span><span class=o>.</span><span class=n>org</span><span class=o>/</span>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>getLinkFromEmail</span> <span class=o>=</span> <span class=p>(</span><span class=n>email</span><span class=p>,</span> <span class=n>tag</span><span class=p>)</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=n>console</span><span class=o>.</span><span class=n>log</span><span class=p>(</span><span class=err>`</span><span class=n>getLinkFromEmail</span> <span class=o>$</span><span class=p>{</span><span class=n>email</span><span class=p>}</span> <span class=o>$</span><span class=p>{</span><span class=n>tag</span><span class=p>}</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>body</span> <span class=o>=</span> <span class=n>utf8</span><span class=o>.</span><span class=n>decode</span><span class=p>(</span><span class=n>quotedPrintable</span><span class=o>.</span><span class=n>decode</span><span class=p>(</span><span class=n>email</span><span class=o>.</span><span class=n>Content</span><span class=o>.</span><span class=n>Body</span><span class=p>));</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>html</span> <span class=o>=</span> <span class=n>cheerio</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>body</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>links</span> <span class=o>=</span> <span class=n>html</span><span class=p>(</span><span class=n>tag</span><span class=p>)</span><span class=o>.</span><span class=n>find</span><span class=p>(</span><span class=s1>&#39;a&#39;</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>link</span> <span class=o>=</span> <span class=n>links</span><span class=p>[</span><span class=mi>0</span><span class=p>];</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=n>result</span> <span class=o>=</span> <span class=n>link</span><span class=o>.</span><span class=n>attribs</span><span class=o>.</span><span class=n>href</span><span class=p>;</span>
-</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>result</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=k>const</span> <span class=n>deleteAllEmails</span> <span class=o>=</span> <span class=n>async</span> <span class=p>()</span> <span class=o>=&gt;</span> <span class=p>{</span>
-</span></span><span class=line><span class=cl>  <span class=k>const</span> <span class=p>{</span> <span class=n>data</span> <span class=p>}</span> <span class=o>=</span> <span class=n>await</span> <span class=n>axios</span><span class=o>.</span><span class=n>delete</span><span class=p>(</span><span class=err>`</span><span class=o>$</span><span class=p>{</span><span class=n>MAILHOG_HOST</span><span class=p>}</span><span class=o>/</span><span class=n>api</span><span class=o>/</span><span class=n>v1</span><span class=o>/</span><span class=n>messages</span><span class=err>`</span><span class=p>);</span>
-</span></span><span class=line><span class=cl>  <span class=k>return</span> <span class=n>data</span><span class=p>;</span>
-</span></span><span class=line><span class=cl><span class=p>}</span>
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl><span class=n>module</span><span class=o>.</span><span class=n>exports</span> <span class=o>=</span> <span class=p>{</span> <span class=n>getEmail</span><span class=p>,</span> <span class=n>deleteAllEmails</span><span class=p>,</span> <span class=n>getLinkFromEmail</span> <span class=p>};</span>
-</span></span></code></pre></div><p>Now you can use it like this in your test code</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>    cy.task(&#39;getEmail&#39;, email).then(response =&gt; {
-</span></span><span class=line><span class=cl>      expect(response).to.exist;
-</span></span><span class=line><span class=cl>      cy.log(`Email found ${response.ID}`);
-</span></span><span class=line><span class=cl>
-</span></span><span class=line><span class=cl>      cy.task(&#39;getLinkFromEmail&#39;, { email: response, tag: &#39;#button&#39; }).then(url =&gt; {
-</span></span><span class=line><span class=cl>        cy.log(&#39;Account confirmation URL&#39;, url);
-</span></span><span class=line><span class=cl>        cy.visit(url);
-</span></span><span class=line><span class=cl>      })
-</span></span><span class=line><span class=cl>    });
-</span></span></code></pre></div><p>Enjoy!</p><p><img src=/images/2022/hog.png alt=hog></p></div></div><div class=footer><div class=footer-social><span class="social-icon social-icon-twitter"><a href=https://twitter.com/athanazio title=twitter target=_blank rel=noopener><img src=/images/icons/twitter.svg width=24 height=24 alt=twitter>
-</a></span><span class="social-icon social-icon-github"><a href=https://github.com/hamilton-lima title=github target=_blank rel=noopener><img src=/images/icons/github.svg width=24 height=24 alt=github>
-</a></span><span class="social-icon social-icon-linkedin"><a href=https://www.linkedin.com/in/hamiltonlima title=linkedin target=_blank rel=noopener><img src=/images/icons/linkedin.svg width=24 height=24 alt=linkedin></a></span></div></div></div><script type=text/javascript src=/js/bundle.min.5993fcb11c07dea925a3fbd58c03c7f1857197c35fccce3aa963a12c0b3c9960.js></script></body></html>
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="ie=edge"><title>Confirm new user email with Cypress and MailHog - Hamilton Lima</title><meta name=viewport content="width=device-width,initial-scale=1"><link rel=icon href=https://hamiltonlima.comfavicon.png><link rel=canonical href=https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/><link rel=stylesheet href=/css/style.min.381fd69187be1f5dde5031ac9014016e77965dbc38358cb065b6fede27b5861c.css><link rel=stylesheet href=/assets/css/extended.min.9729f28a5087b689b946e103d96abd63bfd37b1417effa251dbf798312e3fba5.css><meta property="og:title" content="Confirm new user email with Cypress and MailHog"><meta property="og:type" content="website"><meta property="og:url" content="https://hamiltonlima.com/posts/confirm-new-user-email-with-cypress-and-mailhog/"><meta name=twitter:card content="summary"><meta name=twitter:site content="@athanazio"><meta name=twitter:creator content="@athanazio"><link rel=preconnect href=https://fonts.gstatic.com><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel=stylesheet></head><body class="page frame page-blog-single"><div id=menu-main-mobile class=menu-main-mobile><ul class=menu><li class=menu-item-posts><a href=https://hamiltonlima.com/posts>Posts</a></li></ul></div><div id=wrapper class=wrapper><div class=header><a class=header-logo href=/>Hamilton Lima</a><div class=menu-main><ul><li class=menu-item-posts><a href=/posts><span>Posts</span></a></li></ul></div><div id=toggle-menu-main-mobile class=hamburger-trigger><button class=hamburger>Menu</button></div></div><div class=blog><div class=intro><h1>Confirm new user email with Cypress and MailHog<span class=dot>.</span></h1></div><div class=content><p>I really like <a href=https://cypress.io>Cypress</a>, The tool is interactive, very developer friendly even if you don&rsquo;t plan to have a fully automated test suite, it really can save time automating tasks like, fill some forms, repeat some tasks, reproduce bugs, create new users&mldr; create new USERS&mldr; oh wait CREATE NEW USERS, how on earth I will validate the user email?</p><p><img src=/images/2022/user-creation-automation-steps-cypress.jpg alt="Gru showing steps of user creation with cypress"></p><h2 id=so-many-options>So many options</h2><p>There are some posssibilities</p><ul><li>Pay some email API services, oh GMAIL why you don&rsquo;t have it?</li><li>Navigate to mailinator webpage, parse the HTML and find the email, I need internet for this.</li><li>Pay mailinator API, did that in the past, works just fine, but you know&mldr; money.</li></ul><p>Then some revelation come, not really just research on options, why not use a local email server then build an API to get the email contents? The first one that came to mind is <a href=https://james.apache.org/>James</a> very stable email server, save data in the database, so it would be super easy to extract the messages, but why not an existing solution that is email server AND already have the API?</p><p>Then I found <a href=https://github.com/mailhog/MailHog>MAILHOG</a>! Email server with API to fetch the data, oh this is good, very good :)</p><h2 id=how-it-works>How it works?</h2><p>So let&rsquo;s see the entire process, with some quick notes</p><ul><li>Start email server, docker-compose is your friend, this is the image: <code>mailhog/mailhog:v1.0.1</code> and these are the ports: 1025 and 8025</li><li>we delete all messages from the local email server, call DELETE using <code>/api/v1/messages</code></li><li>visit the user creation page, <code>cy.visit()</code></li><li>enter the data for the new user, generate some fake date with <code>@faker-js/faker</code> then use multiple <code>cy.get().type()</code></li><li>submit the form, <code>cy.get().click()</code></li><li>confirm that the API finished with success, <code>cy.intercept()</code> and <code>cy.wait()</code></li><li>the API will send and email to our mailhog local server, included a environment variable use <a href=https://nodemailer.com>nodemailer</a> to send the messages to the test server instead of <a href=https://www.mailgun.com>mailgun</a></li><li>get email received to the created user, call GET <code>/api/v1/messages</code> then <code>/api/v1/messages/{id}</code></li><li>find the confirmation link in the email, decode from <code>quotedPrintable</code> then parse the HTML using <a href=https://cheerio.js.org>cherio</a></li><li>visit the link, <code>cy.visit()</code></li><li>login with the new account</li></ul><h2 id=show-me-the-code>Show me the code</h2><p>Docker compose for the the email</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>  email:
+    container_name: email
+    image: mailhog/mailhog:v1.0.1    
+    ports:
+      - 1025:1025
+      - 8025:8025
+    logging:
+      driver: &#34;json-file&#34;
+      options:
+        max-size: &#34;200k&#34;
+        max-file: &#34;10&#34;
+</code></pre></div><p>Delete all the emails</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>cy.task(&#39;deleteAllEmails&#39;, email).then(response =&gt; {
+  cy.log(`All emails deleted from the mail box ${response}`);
+})
+
+// code in the plugin
+...
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+</code></pre></div><p>Visiting the signup page</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>  beforeEach(() =&gt; {
+    cy.visit(`${host}/signup/newuser`);
+  })
+</code></pre></div><p>Generating fake data and entering in the fields, remember to add the <code>id</code> to the input fields, there is always to option to use the <a href=https://docs.cypress.io/guides/references/best-practices#Selecting-Elements>recommended cypress strategy</a>, <code>cy.get('[data-cy=submit]').click()</code> but I prefer the syntax using the id <code>cy.get('#submit]').click()</code> as most of the time with the new frameworks we pretty much don&rsquo;t change component id, then this field is less volatile, and the syntax seems more readable.</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>  let email;
+  let password;
+  let firstName;
+  let lastName;
+
+  before(() =&gt; {
+    password = faker.internet.password();
+    firstName = faker.name.findName();
+    lastName = faker.name.findName();
+    email = faker.internet.email(firstName, lastName, &#39;host.docker.internal&#39;);
+  })
+
+... 
+    cy.get(&#39;#firstName&#39;).type(firstName);
+    cy.get(&#39;#lastName&#39;).type(lastName);
+    cy.get(&#39;#email&#39;).type(email);
+    cy.get(&#39;#password&#39;).type(password);
+</code></pre></div><p>Submit the form and check if the API finished without problems</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>    cy.intercept(&#39;POST&#39;, &#39;**/user/create*&#39;).as(&#39;CREATE&#39;)
+    cy.get(&#39;#submit&#39;).click();
+    cy.wait(&#39;@CREATE&#39;).its(&#39;response.statusCode&#39;).should(&#39;be.oneOf&#39;, [201])
+</code></pre></div><p>Nodemailer sending email to local server WITHOUT authentication, note that it uses the same data structure as mailgun</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>  async sendEmail(data: MailgunData): Promise&lt;string&gt; {
+    try {
+      this.logger.log(`Send email local ${data.subject} TO: ${data.to}`);
+
+      const transporter = nodemailer.createTransport({
+        port: 1025,
+        host: &#39;host.docker.internal&#39;,
+        secure: false,
+      });
+
+      const result = await transporter.sendMail(data);
+      this.logger.log(`Email sent ${JSON.stringify(result)}`);
+ 
+      return result;
+    } catch (error) {
+      this.logger.error(&#39;Error when sending the notification&#39;, error);
+    }
+  }
+...
+export class MailgunData {
+  subject: string;
+  from: string;
+  to: string;
+  text: string;
+  html: string;
+}  
+</code></pre></div><p>Getting the email messages</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+  ...
+  // do some data massage to get the email ID, see the plugin full code at the end of this.
+  ... 
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+  result = data;
+</code></pre></div><p>DECODE the <a href=https://www.npmjs.com/package/quoted-printable>quotedPrintable</a> then parse the HTML using <a href=https://cheerio.js.org>cherio</a>, OMG this one took some time, read some more here <a href=https://en.wikipedia.org/wiki/Quoted-printable>Quoted Printable</a>, in summary if you see <code>=3D</code> all over the HTML message there is a good chance you need to decode it :)</p><p>After the decoding there was the challenge of parsing the message HTML, cypress offers this but not in the plugin code, so then I used <a href=https://cheerio.js.org>cherio</a>, my new friend, to parse the HTML, this is such a nicely done piece of technology, simple and very resourcefull. it works just as expected, feed in the HTML, get a parsed object, do queries to find elements, receive a LIST get the one you want and boom retrieve some attributes.</p><p>See the code, it speaks for it self</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+</code></pre></div><p>BONUS - create a plugin for cypress</p><p>Add this to your <code>plugins/index.js</code></p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>/// &lt;reference types=&#34;cypress&#34; /&gt;
+const mailHogAPI = require(&#39;./mail-hog.api&#39;)
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
+module.exports = (on, config) =&gt; {
+  on(&#34;task&#34;, {
+    async &#34;getEmail&#34;(to) {
+      return await mailHogAPI.getEmail(to);
+    },
+    async &#34;deleteAllEmails&#34;() {
+      return await mailHogAPI.deleteAllEmails();
+    },
+    async &#34;getLinkFromEmail&#34;({ email, tag }) {
+      return mailHogAPI.getLinkFromEmail(email, tag);
+    }
+  })
+};
+</code></pre></div><p>And the plugin file itself <code>plugins/mail-hog.api.js</code></p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>const axios = require(&#34;axios&#34;);
+const cheerio = require(&#39;cheerio&#39;);
+var quotedPrintable = require(&#39;quoted-printable&#39;);
+var utf8 = require(&#39;utf8&#39;);
+
+const MAILHOG_HOST = process.env.MAILHOG_HOST || &#39;http://host.docker.internal:8025&#39;;
+// See API documentation here https://github.com/mailhog/MailHog/blob/master/docs/APIv1.md
+
+const getEmail = async (to) =&gt; {
+  if (!to) {
+    return;
+  } else {
+    to = to.toLowerCase();
+  }
+
+  const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages`);
+
+  let id = null;
+  let result = null;
+
+  // search path []{ID,Raw:[{To:[string]}]}
+  if (data) {
+    for (let message of data) {
+      if (message.Raw &amp;&amp; message.Raw.To) {
+        if (message.Raw.To.includes(to)) {
+          id = message.ID;
+          break;
+        }
+      }
+    }
+  }
+
+  if (id) {
+    const { data } = await axios.get(`${MAILHOG_HOST}/api/v1/messages/${id}`);
+    result = data;
+  }
+  return result;
+};
+
+// tagSelector, see https://cheerio.js.org/
+const getLinkFromEmail = (email, tag) =&gt; {
+  console.log(`getLinkFromEmail ${email} ${tag}`);
+  const body = utf8.decode(quotedPrintable.decode(email.Content.Body));
+  const html = cheerio.load(body);
+  const links = html(tag).find(&#39;a&#39;);
+  const link = links[0];
+  const result = link.attribs.href;
+  return result;
+}
+
+const deleteAllEmails = async () =&gt; {
+  const { data } = await axios.delete(`${MAILHOG_HOST}/api/v1/messages`);
+  return data;
+}
+
+module.exports = { getEmail, deleteAllEmails, getLinkFromEmail };
+</code></pre></div><p>Now you can use it like this in your test code</p><div class=highlight><pre class=chroma><code class=language-fallback data-lang=fallback>    cy.task(&#39;getEmail&#39;, email).then(response =&gt; {
+      expect(response).to.exist;
+      cy.log(`Email found ${response.ID}`);
+
+      cy.task(&#39;getLinkFromEmail&#39;, { email: response, tag: &#39;#button&#39; }).then(url =&gt; {
+        cy.log(&#39;Account confirmation URL&#39;, url);
+        cy.visit(url);
+      })
+    });
+</code></pre></div><p>Enjoy!</p><p><img src=/images/2022/hog.png alt=hog></p></div></div><div class=footer><div class=footer-social><span class="social-icon social-icon-twitter"><a href=https://twitter.com/athanazio title=twitter target=_blank rel=noopener><img src=/images/icons/twitter.svg width=24 height=24 alt=twitter></a></span>
+<span class="social-icon social-icon-github"><a href=https://github.com/hamilton-lima title=github target=_blank rel=noopener><img src=/images/icons/github.svg width=24 height=24 alt=github></a></span>
+<span class="social-icon social-icon-linkedin"><a href=https://www.linkedin.com/in/hamiltonlima title=linkedin target=_blank rel=noopener><img src=/images/icons/linkedin.svg width=24 height=24 alt=linkedin></a></span></div></div></div><script type=text/javascript src=/js/bundle.min.df8701b5f509374aa1fd6b7f39e6100d9eedbb268d023d3bec1a6e8220fd6dee.js></script></body></html>
