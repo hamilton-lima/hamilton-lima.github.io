@@ -1,0 +1,30 @@
+---
+title: 'Daily Standups with a Twist: Ideas to Encourage Team Autonomy'
+date: Sat, 17 Aug 2024 01:47:00 +0000
+draft: false
+tags: ['remote', 'work', 'scrum', 'daily']
+---
+
+We are social animals and want to be part of a tribe, feel accepted, useful, and so on. Combine that with the fact that working remotely is incredibly convenient and productive—there's no commuting downtime. (By the way, I’m not talking to those of you who join meetings while driving. Please don't do that!) So, how do we achieve collaboration and a sense of belonging in a remote setting? I don't have all the answers, but I can share some of the experiences and lessons we learned while building Playspace. By the way, you should check it out [here](https://www.playspace.health/).
+
+![One does not simply make all daily syncs the same](/images/2024/daily-standups-with-a-twist-ideas-to-encourage-team-autonomy.jpg) 
+Not all daily syncs need to be the same.
+
+When following SCRUM recommendations, there's this "magical formula" for daily meetings: say the three things—what you did yesterday, what you're doing today, and whether you have any blockers. This is a fine starting point, kind of like training wheels. But as my therapist recently said, "Lacanians are more Lacanian than [Lacan](https://en.wikipedia.org/wiki/Lacanianism) himself!" So don’t be a SCRUM zealot, be an [Agile manifesto](https://agilemanifesto.org/) zealot 😊. 
+
+This formula is just a starting point. The goal is to evolve your own way of conducting daily meetings. Pretend you're in a [CMMi level 5](https://en.wikipedia.org/wiki/Capability_Maturity_Model_Integration) organization (even if you're not), and tailor the daily meeting to benefit your team. Understand why you're doing it. Here are some reasons:
+
+When you talk about what you did yesterday, it shouldn't be a status report. This is your moment to "show and tell"—not a full 10-minute demo, but share something meaningful that could benefit others on the team. If you don’t know what to share, that’s a good indication you might not understand why you’re doing what you're doing. It’s a moment to say, "Hey everyone, look what I did!" Not just, "I finished ticket 45322 and started working on 1284." If you feel the need to micromanage, don’t do it during the daily. Do it through the tickets (or better yet, don't micromanage at all, and focus on results).
+
+Your plan for the day is a heads-up: "I shouldn't be interrupted," or "Those of you depending on this feature should expect results soon." Blockers, however, are a different conversation. I strongly advocate for the "Big Red Button" idea from [Toyota](https://en.wikipedia.org/wiki/Autonomation) or the Toronto subway lady's wisdom: "[If you see something, say something](https://www.youtube.com/shorts/Mar8csbRgkg)." If you’re blocked, sound the alarm! Escalate the issue through your team's communication tools. Tag people, call, ask for help—not at the next meeting, but now. This simple principle can remove a lot of waiting time from projects and will have a huge compound effect on how your deliverables flow.
+
+To unblock yourself as quickly as possible, some key prerequisites must be in place. The team must understand that deliverables don’t belong to individuals alone—they belong to the team. Each person does their part, but the results are shared. The goal isn’t to prepare for failure or find someone to blame but to achieve success as a team. Psychological safety isn't just about expressing opinions—it's about feeling safe to ask for help.
+
+We’ve set up a few intentional guidelines to build trust within the team, ensuring that everyone feels comfortable asking for help as soon as they need it:
+
+- Agree on a limit for how long you'll try to solve a problem before asking for help. For some, that might be 15 minutes; for others, it could be two hours. It depends on the task and level of experience. This agreement is valuable because it reassures everyone that when help is requested, the person has already done their best to solve the issue independently. This builds trust within the team and makes it easier for others to respond positively and offer support, knowing that their help is genuinely needed.
+- Reserve time in your daily meetings for open conversation. I’d suggest allocating about half the time to this. Let the team talk. If nobody starts, the talkative people will naturally pick it up. If nothing’s going on—no social events, no interesting movies, no funny pet stories, or nothing new to share—that’s fine. Move on to the status update. Not every day will feel like a chatty one. However, creating space for casual conversations builds familiarity and camaraderie within the team, making it easier to ask for help when needed. We are naturally more comfortable seeking help from someone we know than from a stranger.
+- Avoid guiding the meeting too strictly. The team should self-organize. While guidelines and principles should be enforced, and gentle nudges are okay, over-guiding the meeting suggests that someone needs to control the team. This undermines the team's ability to self-organize and collaborate effectively. As a leader, stepping back from control empowers the team to take ownership of the process. For example, when deciding who starts the status update, we have a practice: whoever went last in the previous meeting starts first this time and then passes it along. This has even turned into a mini-game for us, as most days we can't remember who went last!
+- Once a month, take a day to celebrate the time the team has spent together. It’s like a mini-anniversary—a moment to acknowledge how fast time flies and that every day should count. This is also a reminder to be kind to each other because life is short, and the connections we build with our teammates matter. It’s okay to focus, but always do so with kindness and empathy. I’ve written more about this on "[Happy blue t-shirt day](https://hamiltonlima.com/posts/happy-blue-tshirt-day/)".
+
+What lessons have you learned while working remotely?
