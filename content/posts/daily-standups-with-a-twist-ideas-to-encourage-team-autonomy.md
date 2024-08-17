@@ -8,7 +8,6 @@ tags: ['remote', 'work', 'scrum', 'daily']
 We are social animals and want to be part of a tribe, feel accepted, useful, and so on. Combine that with the fact that working remotely is incredibly convenient and productive—there's no commuting downtime. (By the way, I’m not talking to those of you who join meetings while driving. Please don't do that!) So, how do we achieve collaboration and a sense of belonging in a remote setting? I don't have all the answers, but I can share some of the experiences and lessons we learned while building Playspace. By the way, you should check it out [here](https://www.playspace.health/).
 
 ![One does not simply make all daily syncs the same](/images/2024/daily-standups-with-a-twist-ideas-to-encourage-team-autonomy.jpg) 
-Not all daily syncs need to be the same.
 
 When following SCRUM recommendations, there's this "magical formula" for daily meetings: say the three things—what you did yesterday, what you're doing today, and whether you have any blockers. This is a fine starting point, kind of like training wheels. But as my therapist recently said, "Lacanians are more Lacanian than [Lacan](https://en.wikipedia.org/wiki/Lacanianism) himself!" So don’t be a SCRUM zealot, be an [Agile manifesto](https://agilemanifesto.org/) zealot 😊. 
 
