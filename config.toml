@@ -11,7 +11,7 @@ pygmentsUseClasses  = true
 rssLimit = 10  # Maximum number of items in the RSS feed.
 copyright = "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License." # This message is only used by the RSS template.
 enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/functions/emojify/
-googleAnalytics = "G-CFNGHJCTX3"
+# googleAnalytics = "G-CFNGHJCTX3"
 # disqusShortname = "yourdiscussshortname"
 
 [author]
@@ -52,7 +52,7 @@ googleAnalytics = "G-CFNGHJCTX3"
   code_copy_button = true # Turn on/off the code-copy-button for code-fields
   
 # hugo-winston-theme
-  google_analytics_id = ""
+  google_analytics_id = "G-CFNGHJCTX3"
   twitter_handle = "@athanazio"
   showAuthorOnHomepage = true
   showAuthorOnPosts = false
