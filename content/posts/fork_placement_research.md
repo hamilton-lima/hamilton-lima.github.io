@@ -1,6 +1,6 @@
 ---
 title: "Final Research Result on Fork Placement Interpretation"
-date: Fri, 12 Oct 2024 15:00:00 +0000
+date: Sun, 01 Sep 2024 15:00:00 +0000
 draft: false
 tags:
   [
