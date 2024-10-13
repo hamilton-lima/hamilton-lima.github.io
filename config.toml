@@ -52,7 +52,7 @@ enableEmoji = true  # Shorthand emojis in content files - https://gohugo.io/func
   code_copy_button = true # Turn on/off the code-copy-button for code-fields
   
 # hugo-winston-theme
-  google_analytics_id = "G-Y59PC173VR"
+  google_analytics_id = "G-J7T3DC7D47"
   twitter_handle = "@athanazio"
   showAuthorOnHomepage = true
   showAuthorOnPosts = false
