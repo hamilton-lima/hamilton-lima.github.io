@@ -5,6 +5,8 @@ draft: false
 tags: ['developer-happiness', 'team-organization', 'psychological-safety', 'software-development', 'team-topologies', 'workplace-culture', 'scarf-model', 'job-satisfaction', 'software-teams', 'stack-overflow']
 ---
 
+![The pieces of the puzzle](/images/2024/developer-happiness.jpg)
+
 Looking at Stack Overflow's 2024 Developer Survey, [specifically the question about job satisfaction](https://survey.stackoverflow.co/2024/professional-developers#job-industry-and-satisfaction-job-sat), we see a pretty sad story: roughly 80% of developers are either unhappy or just complacent at work. Think about that - only 2 out of 10 professional developers actually enjoy what they're doing.
 
 This feels really wrong. When you look at the factors that contribute to happiness and unhappiness at work, about 50% relates to things like improving code quality, learning new technologies, building environments, or working on architecture. My interpretation? People are bored. They're unhappy because they're doing the same things over and over, instead of making their work better, learning new things, building new solutions, or solving interesting problems.
