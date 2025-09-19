@@ -51,4 +51,4 @@ For some [**neurodivergent**](https://en.wikipedia.org/wiki/Neurodiversity) indi
 
 So, I invite you to try an experiment. For just one day, or even just one hour, embrace WIP-ONE. Pick your most important task and give it your full, undivided attention. See how it feels to quiet the noise and truly connect with your work. You might just unlock a more effective and peaceful way of getting things done.
 
-![](/images/2025/wip-one-your-focus-superpower.png)
+![At the end of the day we are just potatoes with complicated emotions](/images/2025/wip-one-your-focus-superpower.png)
