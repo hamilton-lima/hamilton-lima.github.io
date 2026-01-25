@@ -31,10 +31,23 @@ We are running to the scenario where we will fully overseer the build of softwar
 # Transition to smaller cycles 
 welcome to my transition from hours of work building something, to observing more than one AI. The momment we take [Conductor]( https://www.conductor.build/) or [Gas Town]( https://github.com/steveyegge/gastown) approach, we face ourselves with the question: How many is too many?
 
+# Getting angry at AI
+dont do that it is silly - but dont say that: is also silly :D 
+- Now I understand
+- You are right
+
+https://absolutelyright.lol/
+
+![I was absolutely right](/images/2026/i-was-absolutely-right.png)
+
+
 # All the experts in the world
 Is everybody an expert and how to build experts?
 
 # How to build experts?
+
+# Good practices with a different time
+retrospectives one a week? no you do it many times a day with the agents and update the skills live 
 
 # will we have jobs?
 
