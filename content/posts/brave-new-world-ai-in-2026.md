@@ -40,15 +40,20 @@ https://absolutelyright.lol/
 
 ![I was absolutely right](/images/2026/i-was-absolutely-right.png)
 
+## Good practices with a different time
+retrospectives one a week? no you do it many times a day with the agents and update the skills live 
+
 
 # All the experts in the world
 Is everybody an expert and how to build experts?
 
 # How to build experts?
 
-# Good practices with a different time
-retrospectives one a week? no you do it many times a day with the agents and update the skills live 
 
 # will we have jobs?
 
 Add the paradox as a hope! and the idea of the increased value for the 5% of the work
+
+# danger zone
+
+be nice to each other
