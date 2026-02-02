@@ -9,7 +9,32 @@ My Friend [Deepesh Mehta](https://www.linkedin.com/in/deepeshhmehta/) asked me t
 
 That demand generated a new feature to lilarmy, scripts in the cards! on top of creating cards with annotations, tags, AI agents to auto tag, drawings, images, drawing inside the cards, cards inside cards, all of that, now you can also add Python scripts to the cards, awaiting for events to happen.
 
-Oh almost forgot, now when you paste a JSON array in the lilarmy it will create a card of type database autodetecting the JSON columns and creating one card for each item in the array.
+Oh almost forgot, now when you paste a JSON array in the lilarmy it will create a card of type database autodetecting the JSON columns and creating one card for each item in the array. For example, when you paste a JSON like this:
+
+```json
+[
+  {
+    "brand": "TAZO",
+    "name": "Wild Sweet Orange",
+    "type": "Herbal Tea",
+    "quantity": 1
+  },
+  {
+    "brand": "Tetley",
+    "name": "Super Herbal Tea IMMUNE",
+    "description": "Lemon & Echinacea with Zinc",
+    "size": "40g",
+    "quantity": 1
+  },
+  {
+    "brand": "Twinings",
+    "name": "Unknown variety",
+    "quantity": 1
+  }
+]
+```
+
+Lilarmy will automatically detect the columns (`brand`, `name`, `type`, `description`, `size`, `quantity`) and create individual cards for each item in a database view.
 
 ## Gathering inventory data from images
 
