@@ -5,6 +5,8 @@ tags: ["leadership", "people", "empathy", "psychology"]
 description: "What a 1928 psychoanalyst can teach us about the two ways leaders fail their people — and how to build the self-awareness to catch yourself before you tip."
 ---
 
+![Ferenczi and Radical Candor book](/images/2026/ferenczi-radical-candor.png) 
+
 "If you want to build a ship, don't drum up the men to gather wood, divide the work, and give orders. Instead, teach them to yearn for the vast and endless sea." — [Antoine de Saint-Exupéry](https://en.wikipedia.org/wiki/Antoine_de_Saint-Exup%C3%A9ry)
 
 I keep this quote on my homepage because it captures something fundamental about leading people: it's not about the mechanics, it's about connection. Recently I stumbled upon a concept from psychoanalysis that gave me a new lens to think about this, and I want to share it because it maps surprisingly well onto the challenges we face as leaders of people.
